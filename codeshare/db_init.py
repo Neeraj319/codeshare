@@ -1,6 +1,4 @@
-from tortoise.models import Model
-from tortoise import Tortoise, run_async
-from tortoise import fields
+from tortoise import Tortoise
 
 
 class DBConnector:
@@ -23,3 +21,10 @@ async def main():
 
 async def close_db_connection():
     await Tortoise.close_connections()
+
+
+async def create_table():
+    await Tortoise.init(
+        db_url="sqlite://db.sqlite3", modules={"models": ["home.models"]}
+    )
+    await Tortoise.generate_schemas(safe=True)
