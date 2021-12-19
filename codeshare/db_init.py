@@ -13,3 +13,13 @@ class DBConnector:
 
     async def __aexit__(self, exc_type, exc, tb):
         await Tortoise.close_connections()
+
+
+async def main():
+    await Tortoise.init(
+        db_url="sqlite://db.sqlite3", modules={"models": ["home.models"]}
+    )
+
+
+async def close_db_connection():
+    await Tortoise.close_connections()
