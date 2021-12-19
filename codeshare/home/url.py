@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
-from .views import main
+from .views import create_user
 
 router = APIRouter(prefix="/home", tags=["home"])
 
-router.get("/")(main)
+router.get("/")(create_user)

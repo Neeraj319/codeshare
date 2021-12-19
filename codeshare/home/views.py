@@ -1,2 +1,2 @@
-def main():
-    return "ok"
+def create_user():
+    ...
