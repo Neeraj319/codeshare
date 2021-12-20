@@ -15,7 +15,7 @@ class DBConnector:
 
 async def main():
     await Tortoise.init(
-        db_url="sqlite://db.sqlite3", modules={"models": ["home.models"]}
+        db_url="sqlite://data/db.sqlite3", modules={"models": ["home.models"]}
     )
 
 
@@ -25,7 +25,7 @@ async def close_db_connection():
 
 async def create_table():
     await Tortoise.init(
-        db_url="sqlite://db.sqlite3", modules={"models": ["home.models"]}
+        db_url="sqlite://data/db.sqlite3", modules={"models": ["home.models"]}
     )
     await Tortoise.generate_schemas()
     await Tortoise.close_connections()

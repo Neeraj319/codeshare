@@ -6,6 +6,7 @@ services:
       - 8000:8000
     command: poetry run uvicorn --host 0.0.0.0 main:app --reload
     volumes:
-      - codeshare-back_app-data:/app
+      - .:/app
+      - back-vol:/app/data
 volumes:
-  codeshare-back_app-data:
+  back-vol:
