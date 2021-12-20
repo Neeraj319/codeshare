@@ -11,6 +11,6 @@ WORKDIR /app
 
 COPY poetry.lock pyproject.toml /app/
 
-RUN poetry install --no-interaction --no-ansi
 COPY . /app/
-RUN cd codeshare/ && python init.py
+RUN poetry install --no-interaction --no-ansi
+RUN python3 codeshare/init.py

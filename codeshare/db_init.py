@@ -27,4 +27,5 @@ async def create_table():
     await Tortoise.init(
         db_url="sqlite://db.sqlite3", modules={"models": ["home.models"]}
     )
-    await Tortoise.generate_schemas(safe=True)
+    await Tortoise.generate_schemas()
+    await Tortoise.close_connections()

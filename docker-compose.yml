@@ -2,13 +2,10 @@ version: "3.8"
 services:
   app:
     build: .
-    
     ports:
       - 8000:8000
-    volumes:
-      - app-data:/app/data
     command: poetry run uvicorn --host 0.0.0.0 main:app --reload
     volumes:
-    - .:/app
+      - codeshare-back_app-data:/app
 volumes:
-  app-data:
+  codeshare-back_app-data:
