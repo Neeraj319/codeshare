@@ -4,6 +4,9 @@ ARG POETRY_VERSION=1.1.12
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH "${PYTHONPATH}:/app"
+ENV HASH_FUNCTION=bcrypt
+ENV SECRET_KEY=skdfhakjsfhakljfdhalkjfh8736483248372648372hjkdhfakjlhdsfjka
+ENV ALGORITHM=HS256
 
 RUN pip install "poetry==$POETRY_VERSION" && poetry config virtualenvs.create false
 
