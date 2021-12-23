@@ -2,10 +2,9 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from starlette import status
 from .models import User
-from .dependencies import add_user, create_token, authenticate_user, get_user
+from .dependencies import add_user
+from .auth_dependencies import create_token, authenticate_user, get_user
 from .schema import PydanticUser
-from fastapi.responses import Response
-from fastapi import Request
 
 
 async def create_user(user: PydanticUser):

@@ -17,4 +17,4 @@ COPY poetry.lock pyproject.toml /app/
 COPY . /app/
 RUN poetry install --no-interaction --no-ansi
 RUN mkdir data
-RUN python3 codeshare/init.py
+RUN python3 manage.py create_tables
