@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter
-from home.url import router
+from auth.url import router
 from codeshare.db_init import main, close_db_connection
 import asyncio
 

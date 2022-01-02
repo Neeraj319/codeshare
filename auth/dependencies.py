@@ -2,7 +2,7 @@ from fastapi.param_functions import Depends
 from .models import User
 from fastapi import status, HTTPException
 from .schema import PydanticUser
-from codeshare.settings import pwd
+from codeshare.settings import get_crypto_context
 
 
 async def add_user(user: PydanticUser) -> User:
@@ -21,6 +21,6 @@ async def add_user(user: PydanticUser) -> User:
             detail="username already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
-    password = pwd.hash(user.password)
+    password = get_crypto_context().hash(user.password)
     created_user = await User.create(username=user.username, password=password)
     return created_user
