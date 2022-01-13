@@ -10,7 +10,7 @@ from codeshare.settings import get_crypto_context, get_oauth_2_scheme
 
 async def authenticate_user(username: str, password: str):
     if user := await User.get_or_none(username=username):
-        if not get_oauth_2_scheme().verify(password, user.password):
+        if not get_crypto_context().verify(password, user.password):
             return False
         return user
 
