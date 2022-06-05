@@ -17,7 +17,6 @@ try:
             run_async(create_tables())
     elif len(args) == 3:
         if sys.argv[1] == "createapp" and sys.argv[2]:
-
             create_app(sys.argv[2])
 
         else:

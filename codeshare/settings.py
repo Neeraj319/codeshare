@@ -14,4 +14,4 @@ def get_oauth_2_scheme():
     return OAuth2PasswordBearer(tokenUrl="token")
 
 
-installed_models = ["auth.models"]
+installed_models = ["auth.models", 'core.models']
