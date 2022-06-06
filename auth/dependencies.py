@@ -10,18 +10,20 @@ from codeshare.settings import get_crypto_context, get_oauth_2_scheme
 
 
 async def add_user(user: PydanticUser) -> User:
-
     if len(user.password) < 8:
+        print('password is too short')
         raise HTTPException(
             detail="enter a password of length greater than 8",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     if len(user.password) > 80:
+        print('password is too long')
         raise HTTPException(
             detail="password too long",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     if await User.get_or_none(username=user.username):
+        print('username already exists')
         raise HTTPException(
             detail="username already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -32,6 +34,14 @@ async def add_user(user: PydanticUser) -> User:
         created_user.is_admin = True
         await created_user.save()
     return created_user
+
+
+async def add_superuser(user: PydanticUser) -> User:
+    if await User.get_or_none(username=user.username):
+        print('username already exists')
+        return
+    password = get_crypto_context().hash(user.password)
+    await User.create(username=user.username, password=password, is_admin=True)
 
 
 async def authenticate_user(username: str, password: str):
@@ -77,7 +87,8 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
         raise credentials_exception
 
 
-async def get_super_user(user: PydanticUser):
+async def get_super_user(user: PydanticUser = Depends(get_user_from_token)):
+    print(user)
     if user.is_admin:
         return user
     else:
