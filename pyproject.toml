@@ -12,6 +12,7 @@ uvicorn = "^0.16.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-dotenv = "^0.19.2"
+aerich = "^0.6.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

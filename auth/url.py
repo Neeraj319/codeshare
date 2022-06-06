@@ -3,7 +3,7 @@ from starlette import status
 from .views import create_user, login, users
 
 
-router = APIRouter(prefix="/home", tags=["users"])
+router = APIRouter(prefix="/auth", tags=["users"])
 
 router.post("/signup/")(create_user)
 router.get("/users/")(users)

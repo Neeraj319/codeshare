@@ -1,5 +1,3 @@
-
-
 from tortoise import Tortoise, fields
 from tortoise.models import Model
 
@@ -10,3 +8,8 @@ class Language(Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Code(Model):
+    id = fields.IntField(pk=True)
+    text = fields.TextField()
