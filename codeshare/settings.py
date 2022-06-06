@@ -14,4 +14,17 @@ def get_oauth_2_scheme():
     return OAuth2PasswordBearer(tokenUrl="token")
 
 
-installed_models = ["auth.models", 'core.models']
+installed_models = ["auth.models", 'core.models', ]
+
+TORTOISE_ORM = {
+    "connections": {
+        "default": 'sqlite://data/db.sqlite3',
+    },
+    "apps": {
+        app[0:app.find('.')]: {
+            "models": [app],
+            "default_connection": "default",
+        }
+        for app in installed_models
+    },
+}

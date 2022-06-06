@@ -26,3 +26,4 @@ async def create_tables():
     await Tortoise.init(db_url=DB_URL, modules={"models": installed_models})
     await Tortoise.generate_schemas()
     await Tortoise.close_connections()
+    print('created tables successfully')
