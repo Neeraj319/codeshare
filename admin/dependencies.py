@@ -1,4 +1,3 @@
-
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
 from auth.models import User
@@ -39,6 +38,7 @@ async def add_user(user: PydanticUser) -> User:
 
 async def get_super_user(user: PydanticUser = Depends(get_user_from_token)):
     if user.is_admin:
+        print('lxa')
         return user
     else:
         return None

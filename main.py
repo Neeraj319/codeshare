@@ -4,12 +4,13 @@ from codeshare.db_init import main, close_db_connection
 from admin.urls import router as admin_router
 import asyncio
 from fastapi_pagination import add_pagination
+from core.urls import router as core_router
 app = FastAPI()
 loop = asyncio.get_event_loop()
 asyncio.gather(main())
 app.include_router(router)
 app.include_router(admin_router)
-
+app.include_router(core_router)
 
 add_pagination(app)
 
