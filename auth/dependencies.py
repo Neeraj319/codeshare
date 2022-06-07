@@ -30,18 +30,12 @@ async def add_user(user: PydanticUser) -> User:
         )
     password = get_crypto_context().hash(user.password)
     created_user = await User.create(username=user.username, password=password)
-    if user.is_admin:
-        created_user.is_admin = True
-        await created_user.save()
-    return created_user
-
-
-async def add_superuser(user: PydanticUser) -> User:
-    if await User.get_or_none(username=user.username):
-        print('username already exists')
-        return
-    password = get_crypto_context().hash(user.password)
-    await User.create(username=user.username, password=password, is_admin=True)
+    user = {
+        'id': created_user.id,
+        'username': created_user.username,
+        'is_admin': created_user.is_admin
+    }
+    return user
 
 
 async def authenticate_user(username: str, password: str):
@@ -81,19 +75,18 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    if user := await User.get(username=username):
+    if user := await User.get_or_none(username=username):
         return user
     else:
         raise credentials_exception
 
 
-async def get_super_user(user: PydanticUser = Depends(get_user_from_token)):
-    print(user)
-    if user.is_admin:
-        return user
+async def get_user_by_id(user_id: int):
+    if user := await User.get_or_none(id=user_id):
+        return {
+            'id': user.id,
+            'username': user.username,
+            'is_admin': user.is_admin
+        }
     else:
         return None
-
-
-async def get_user(user: PydanticUser = Depends(get_user_from_token)):
-    return user

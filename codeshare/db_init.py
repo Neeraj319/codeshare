@@ -33,7 +33,7 @@ async def create_super_user(username, password):
 
 
 async def create_tables():
-    await Tortoise.init(db_url=DB_URL, modules={"models": installed_models})
-    await Tortoise.generate_schemas(safe=True)
-    await Tortoise.close_connections()
+    await main()
+    await Tortoise.generate_schemas()
+    await close_db_connection()
     print('created tables successfully')

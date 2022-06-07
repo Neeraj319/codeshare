@@ -1,24 +1,22 @@
 from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from starlette import status
+from fastapi import Request
 from .models import User
 from .dependencies import (
-    create_token, authenticate_user, get_super_user, get_user, add_user,)
+    create_token, authenticate_user,  add_user, get_user_by_id,)
 from .schema import PydanticUser
 
 
-async def create_user(user: PydanticUser):
-
-    await add_user(user)
-
-    return user
+async def signup(user: PydanticUser, request: Request):
+    return await add_user(user)
 
 
 async def login(credentials: PydanticUser):
     if user := await authenticate_user(
         username=credentials.username, password=credentials.password
     ):
-        return await create_token(user)
+        return {"token": await create_token(user)}
     else:
         raise HTTPException(
             detail="invalid username or password",
@@ -26,14 +24,11 @@ async def login(credentials: PydanticUser):
         )
 
 
-async def users(user: PydanticUser = Depends(get_super_user)):
-    """
-    get all users from the database
-    """
-    if user:
-        return await User.all().values("id", "username")
+async def user_detail(user_id: int):
+    if user := await get_user_by_id(user_id):
+        return user
     else:
         raise HTTPException(
-            detail="you are not authorized to access this resource",
-            status_code=status.HTTP_403_FORBIDDEN,
+            detail="user not found",
+            status_code=status.HTTP_404_NOT_FOUND,
         )

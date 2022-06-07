@@ -18,3 +18,4 @@ COPY . /app/
 RUN poetry install --no-interaction --no-ansi
 RUN mkdir data
 RUN python3 manage.py create_tables
+RUN apt update && apt upgrade && apt install sqlite3
