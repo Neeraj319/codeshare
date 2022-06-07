@@ -3,8 +3,7 @@ from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
 from auth.models import User
 from fastapi import status, HTTPException
-from auth.schema import PydanticUser
-
+from auth.schema import PydanticUser, PydanticUserResponseModel
 from codeshare.settings import get_crypto_context
 from auth.dependencies import get_user_from_token
 
@@ -45,5 +44,6 @@ async def get_super_user(user: PydanticUser = Depends(get_user_from_token)):
         return None
 
 
-async def get_user():
-    return await User.all.values("id", "username", "is_admin")
+async def get_users():
+    users = await User.all().values("id", "username", "is_admin")
+    return [PydanticUserResponseModel(**user) for user in users]

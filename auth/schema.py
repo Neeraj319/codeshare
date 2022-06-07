@@ -6,5 +6,11 @@ from typing import Optional
 class PydanticUser(BaseModel):
     id: Optional[int] = None
     username: str
-    password: Optional[str] = None
+    password: str
     is_admin: Optional[bool] = False
+
+
+class PydanticUserResponseModel(BaseModel):
+    id: int
+    username: str
+    is_admin: bool
