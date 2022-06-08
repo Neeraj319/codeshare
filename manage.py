@@ -6,7 +6,7 @@ import os
 
 def create_app(directory):
     os.system(
-        f"mkdir {directory} && cd {directory} && touch __init__.py urls.py views.py models.py dependencies.py schema.py"
+        f"mkdir {directory} && cd {directory} && touch __init__.py urls.py views.py models.py dependencies.py schemas.py"
     )
 
 

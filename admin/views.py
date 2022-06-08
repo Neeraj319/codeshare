@@ -45,5 +45,11 @@ async def create_user(user: PydanticUser, request: Request, admin_user: Pydantic
 }
 
     """
-
-    return await add_user(user)
+    user = await add_user(user)
+    if not user[0]:
+        raise HTTPException(
+            detail=user[1],
+            status_code=status.HTTP_409_CONFLICT,
+        )
+    else:
+        return user[1]
