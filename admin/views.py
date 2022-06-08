@@ -9,7 +9,20 @@ from fastapi_pagination import paginate
 
 async def users(request: Request, admin_user: PydanticUser = Depends(get_super_user)):
     """
-    returns all the users from the database 
+    returns all the users from the database in paginated form 
+    only superusers/admins are allowed to access this route
+{
+  "items": [
+    {
+      "id": int,
+      "username": "string",
+      "is_admin": bool
+    }
+  ],
+  "total": 0,
+  "page": 1,
+  "size": 1
+}
     """
     if admin_user:
         return paginate(await get_users())
@@ -21,4 +34,16 @@ async def users(request: Request, admin_user: PydanticUser = Depends(get_super_u
 
 
 async def create_user(user: PydanticUser, request: Request, admin_user: PydanticUser = Depends(get_super_user)):
+    """
+    admin specific route pass the following to the body
+    returns user in json form in the username passed doesn't exist     
+{
+  "id": int,
+  "username": "string",
+  "password": "string",
+  "is_admin": bool
+}
+
+    """
+
     return await add_user(user)
