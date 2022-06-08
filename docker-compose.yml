@@ -7,6 +7,3 @@ services:
     command: poetry run uvicorn --host 0.0.0.0 main:app --reload
     volumes:
       - .:/app
-      - back-vol:/app/data
-volumes:
-  back-vol:

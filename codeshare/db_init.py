@@ -1,6 +1,7 @@
 from tortoise import Tortoise
 from .settings import DB_URL, installed_models
-from auth import dependencies, schema
+from auth import schema
+from admin import dependencies
 
 
 class DBConnector:

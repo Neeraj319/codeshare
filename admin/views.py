@@ -9,7 +9,7 @@ from fastapi_pagination import paginate
 
 async def users(request: Request, admin_user: PydanticUser = Depends(get_super_user)):
     """
-    get all users from the database
+    returns all the users from the database 
     """
     if admin_user:
         return paginate(await get_users())
@@ -21,5 +21,4 @@ async def users(request: Request, admin_user: PydanticUser = Depends(get_super_u
 
 
 async def create_user(user: PydanticUser, request: Request, admin_user: PydanticUser = Depends(get_super_user)):
-
     return await add_user(user)

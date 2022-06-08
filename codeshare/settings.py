@@ -1,12 +1,14 @@
 import os
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+import dotenv
+dotenv.load_dotenv()
 
-
-DB_URL = "sqlite://data/db.sqlite3"
+DB_URL = os.environ['DB_URL']
 
 
 def get_crypto_context():
+    print(os.environ.get('HASH_FUNCTION'))
     return CryptContext(schemes=[os.environ.get("HASH_FUNCTION")], deprecated="auto")
 
 
@@ -18,7 +20,7 @@ installed_models = ["auth.models", 'core.models', ]
 
 TORTOISE_ORM = {
     "connections": {
-        "default": 'sqlite://data/db.sqlite3',
+        "default": os.environ['DB_URL'],
     },
     "apps": {
         app[0:app.find('.')]: {
