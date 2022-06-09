@@ -32,9 +32,43 @@ async def get_all_languages() -> List[Language]:
 
 
 async def get_language(id: int):
-    if language := await dependencies.get_language(id=id):
+    if language := await dependencies.get_language_fromdb(id=id):
         return language
     raise HTTPException(
         detail='language not found',
+        status_code=status.HTTP_404_NOT_FOUND
+    )
+
+
+async def patch_language(id: int, language: LanguageSchema, user: PydanticUser = Depends(get_super_user)):
+    if not user:
+        raise HTTPException(
+            detail="you are not allowed to view this resource",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    if from_db_language := await dependencies.non_schema_get_language(id=id):
+
+        await dependencies.update_language(language=from_db_language,
+                                           request_data=language)
+        return language
+    raise HTTPException(
+        detail="language not found",
+        status_code=status.HTTP_404_NOT_FOUND
+    )
+
+
+async def delete_language(id: int, user: PydanticUser = Depends(get_super_user)):
+    if not user:
+        raise HTTPException(
+            detail="you are not allowed to view this resource",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    if language := await dependencies.non_schema_get_language(id=id):
+        await dependencies.delete_language(language=language)
+        return {
+            'message': "language deleted successfully"
+        }
+    raise HTTPException(
+        detail="language not found",
         status_code=status.HTTP_404_NOT_FOUND
     )

@@ -14,3 +14,11 @@ router.get(
     '/{id}/',
     status_code=status.HTTP_200_OK,
 )(views.get_language)
+
+router.patch('/{id}/',
+             status_code=status.HTTP_200_OK,
+             )(views.patch_language)
+
+router.delete('/{id}/',
+              status_code=status.HTTP_200_OK,
+              )(views.delete_language)
