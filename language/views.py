@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from fastapi import Depends, HTTPException
 from admin.dependencies import get_super_user
 from auth.schemas import PydanticUser
@@ -29,3 +29,12 @@ async def post_language(language: LanguageSchema, user: PydanticUser = Depends(g
 
 async def get_all_languages() -> List[Language]:
     return await dependencies.all_languages()
+
+
+async def get_language(id: int):
+    if language := await dependencies.get_language(id=id):
+        return language
+    raise HTTPException(
+        detail='language not found',
+        status_code=status.HTTP_404_NOT_FOUND
+    )

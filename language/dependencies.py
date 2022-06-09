@@ -1,4 +1,5 @@
-from unicodedata import name
+
+
 from .schemas import LanguageSchema
 from .models import Language
 
@@ -13,7 +14,10 @@ async def add_language(language: LanguageSchema):
 
 
 async def get_language(id: int):
-    return await Language.get_or_none(id=id)
+    if language := await Language.get_or_none(id=id):
+        return LanguageSchema(name=language.name, id=language.id)
+
+    return None
 
 
 async def all_languages():
