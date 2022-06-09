@@ -3,7 +3,7 @@ from fastapi.param_functions import Depends
 from .models import User
 from fastapi import status, HTTPException
 import os
-from .schema import PydanticUser
+from .schemas import PydanticUser
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from codeshare.settings import get_crypto_context, get_oauth_2_scheme

@@ -2,10 +2,10 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
-from .schema import CodeSchema, LanguageSchema
+from .schemas import CodeSchema, LanguageSchema
 from auth.dependencies import get_user_from_token
 from admin.dependencies import get_super_user
-from auth.schema import PydanticUser
+from auth.schemas import PydanticUser
 
 
 async def create_code(code: CodeSchema, user: PydanticUser = Depends(get_user_from_token)):

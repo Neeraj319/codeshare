@@ -1,7 +1,7 @@
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
 from auth.models import User
-from auth.schema import PydanticUser, PydanticUserResponseModel
+from auth.schemas import PydanticUser, PydanticUserResponseModel
 from codeshare.settings import get_crypto_context
 from auth.dependencies import get_user_from_token
 from typing import List, Tuple, Union

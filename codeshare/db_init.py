@@ -1,6 +1,6 @@
 from tortoise import Tortoise
 from .settings import DB_URL, installed_models
-from auth import schema
+from auth import schemas
 from admin import dependencies
 
 
@@ -27,7 +27,7 @@ async def close_db_connection():
 async def create_super_user(username, password):
     await main()
 
-    user = schema.PydanticUser(
+    user = schemas.PydanticUser(
         username=username, password=password, is_admin=True)
     await dependencies.add_superuser(user)
     await close_db_connection()

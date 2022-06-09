@@ -3,7 +3,7 @@ from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 from .dependencies import (get_super_user, add_user, get_users)
-from auth.schema import PydanticUser
+from auth.schemas import PydanticUser
 from fastapi_pagination import paginate
 
 

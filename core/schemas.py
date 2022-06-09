@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from auth.schema import PydanticUser
+from auth.schemas import PydanticUser
 
 
 class LanguageSchema(BaseModel):
