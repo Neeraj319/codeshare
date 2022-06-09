@@ -16,7 +16,7 @@ def get_oauth_2_scheme():
     return OAuth2PasswordBearer(tokenUrl="token")
 
 
-installed_models = ["auth.models", 'core.models', ]
+installed_models = ["auth.models", 'language.models', "code.models", ]
 
 TORTOISE_ORM = {
     "connections": {

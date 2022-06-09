@@ -1,14 +1,5 @@
 from tortoise import fields
 from tortoise.models import Model
-from auth.models import User
-
-
-class Language(Model):
-    id = fields.IntField(pk=True)
-    name = fields.CharField(max_length=50)
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class Code(Model):
