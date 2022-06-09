@@ -33,7 +33,7 @@ async def users(request: Request, admin_user: PydanticUser = Depends(get_super_u
         )
 
 
-async def create_user(user: PydanticUser, request: Request, admin_user: PydanticUser = Depends(get_super_user)):
+async def create_user(user: PydanticUser, request: Request, request_user: PydanticUser = Depends(get_super_user)):
     """
     admin specific route pass the following to the body
     returns user in json form in the username passed doesn't exist     
@@ -45,6 +45,12 @@ async def create_user(user: PydanticUser, request: Request, admin_user: Pydantic
 }
 
     """
+    if not request_user:
+        raise HTTPException(
+            detail="you are not allowed to view this resource",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+
     user = await add_user(user)
     if not user[0]:
         raise HTTPException(
