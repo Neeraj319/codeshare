@@ -1,0 +1,6 @@
+from starlette import status
+from fastapi.routing import APIRouter
+from {} import views
+router = APIRouter(prefix="/{}", tags=["{}"])
+
+# write your routes here

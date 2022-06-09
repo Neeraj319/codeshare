@@ -1,13 +1,26 @@
 import sys
 from codeshare.db_init import create_tables, create_super_user
 from tortoise import run_async
-import os
+import pathlib
 
 
 def create_app(directory):
-    os.system(
-        f"mkdir {directory} && cd {directory} && touch __init__.py urls.py views.py models.py dependencies.py schemas.py"
-    )
+    path_obj = pathlib.Path() / 'miscellaneous'
+    for objs in pathlib.Path('').iterdir():
+        if objs.name == directory:
+            print("directory already exists")
+            return
+    create_dir = pathlib.Path(directory)
+    create_dir.mkdir(parents=True, exist_ok=True)
+    for dummy_file in path_obj.iterdir():
+        file_name = dummy_file.name.replace('.txt', '.py')
+        path = create_dir / file_name
+        with path.open('w', encoding='utf-8') as f:
+            if file_name.startswith('urls'):
+                f.write(dummy_file.read_text().format(
+                    directory, directory, directory))
+            else:
+                f.write(dummy_file.read_text())
 
 
 try:
