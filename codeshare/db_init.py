@@ -1,7 +1,7 @@
 from tortoise import Tortoise
-from .settings import DB_URL, installed_models
 from auth import schemas
 from admin import dependencies
+from codeshare.settings import DB_URL, installed_models
 
 
 class DBConnector:
@@ -35,6 +35,6 @@ async def create_super_user(username, password):
 
 async def create_tables():
     await main()
-    await Tortoise.generate_schemas()
+    await Tortoise.generate_schemas(safe=True)
     await close_db_connection()
     print('created tables successfully')
