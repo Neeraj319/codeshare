@@ -4,7 +4,7 @@ from codeshare.db_init import main, close_db_connection
 from admin.urls import router as admin_router
 import asyncio
 from fastapi_pagination import add_pagination
-from code.urls import router as code_router
+from code_app.urls import router as code_router
 from language.urls import router as language_router
 app = FastAPI()
 loop = asyncio.get_event_loop()

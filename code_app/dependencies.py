@@ -24,3 +24,11 @@ async def add_code(code: CodeSchema, user: User, language_id: int):
     if language := await Language.get_or_none(id=language_id):
         return await Code.create(user=user, language=language, url=await generate_url(), text=code.text)
     return language
+
+
+async def get_code_by_slug(slug: str):
+    return await Code.get_or_none(url=slug)
+
+
+async def get_all_from_db():
+    return await Code.all()

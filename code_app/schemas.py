@@ -6,3 +6,4 @@ class CodeSchema(BaseModel):
     text: str
     language_id: int
     id: Optional[int] = None
+    url: Optional[str] = None
