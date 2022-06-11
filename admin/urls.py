@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from starlette import status
-from .views import create_user,  users
+from .views import create_user, users
 from fastapi_pagination import Page
 from auth.schemas import PydanticUserResponseModel
+
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 router.post("/create_user/", status_code=status.HTTP_201_CREATED)(create_user)

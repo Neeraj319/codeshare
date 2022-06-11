@@ -22,19 +22,23 @@ async def add_user(user: PydanticUser) -> Union[_T, User]:
         return (False, "username already exists")
     password = get_crypto_context().hash(user.password)
 
-    created_user = await User.create(username=user.username, password=password, is_admin=user.is_admin)
+    created_user = await User.create(
+        username=user.username, password=password, is_admin=user.is_admin
+    )
     user = {
-        'id': created_user.id,
-        'username': created_user.username,
-        'is_admin': created_user.is_admin
+        "id": created_user.id,
+        "username": created_user.username,
+        "is_admin": created_user.is_admin,
     }
     return (True, user)
 
 
-async def get_super_user(user: PydanticUser = Depends(get_user_from_token)) -> Union[PydanticUser, None]:
+async def get_super_user(
+    user: PydanticUser = Depends(get_user_from_token),
+) -> Union[PydanticUser, None]:
     """
-    takes the PydanticUser schema class 
-    -> returns if the user is not a superuser 
+    takes the PydanticUser schema class
+    -> returns if the user is not a superuser
     else returns the user
 
     """
@@ -46,7 +50,7 @@ async def get_super_user(user: PydanticUser = Depends(get_user_from_token)) -> U
 
 async def get_users() -> List[PydanticUserResponseModel]:
     """
-    returns all the users from the database in a list 
+    returns all the users from the database in a list
     """
     users = await User.all().values("id", "username", "is_admin")
     return [PydanticUserResponseModel(**user) for user in users]
@@ -54,11 +58,11 @@ async def get_users() -> List[PydanticUserResponseModel]:
 
 async def add_superuser(user: PydanticUser) -> None:
     """
-    takes the PydanticUser as parameter and creates the user if 
-    user if same username is not passes returns None 
+    takes the PydanticUser as parameter and creates the user if
+    user if same username is not passes returns None
     """
     if await User.get_or_none(username=user.username):
-        print('username already exists')
+        print("username already exists")
         return
     password = get_crypto_context().hash(user.password)
     await User.create(username=user.username, password=password, is_admin=True)
