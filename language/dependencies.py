@@ -27,7 +27,7 @@ async def all_languages():
     return await Language.all()
 
 
-async def update_language(language: Language, request_data=LanguageSchema):
+async def update_language(language: Language, request_data: LanguageSchema):
     del request_data.id
     for attr in request_data:
         if getattr(language, attr[0]):

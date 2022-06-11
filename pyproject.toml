@@ -1,30 +1,28 @@
 [tool.poetry]
-name = "CodeShare"
+name = "codeshare-back"
 version = "0.1.0"
 description = ""
 authors = ["Neeraj319 <itskop520@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-tortoise-orm = "^0.17.8"
-fastapi = "^0.70.1"
-uvicorn = "^0.16.0"
-passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-python-dotenv = "^0.19.2"
+python = "^3.10"
+fastapi = "^0.78.0"
+python-dotenv = "^0.20.0"
 aerich = "^0.6.3"
-tortoise-cli = "^0.1.1"
 fastapi-pagination = "^0.9.3"
-cloudinary = "^1.29.0"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+uvicorn = "^0.17.6"
+asyncpg = "^0.25.0"
+bcrypt = "^3.2.2"
+tortoise-orm = {extras = ["asyncpg"], version = "^0.19.1"}
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
-black = {version = "^21.12b0", allow-prereleases = true}
-autopep8 = "^1.6.0"
+black = {version = "^22.3.0", allow-prereleases = true}
 
 
 [tool.aerich]
-tortoise_orm = "db_init.TORTOISE_ORM"
+tortoise_orm = "main.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."
 [build-system]

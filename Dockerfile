@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 ARG POETRY_VERSION=1.1.12
 
@@ -7,7 +7,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/app"
 ENV HASH_FUNCTION=bcrypt
 ENV SECRET_KEY=skdfhakjsfhakljfdhalkjfh8736483248372648372hjkdhfakjlhdsfjka
 ENV ALGORITHM=HS256
-ENV DB_URL=sqlite:///app/data/db.sqlite3
+ENV DB_URL=postgres://postgres:postgres@db:5432/codeshare
 
 RUN pip install "poetry==$POETRY_VERSION" && poetry config virtualenvs.create false
 
@@ -17,5 +17,3 @@ COPY poetry.lock pyproject.toml /app/
 
 COPY . /app/
 RUN poetry install --no-interaction --no-ansi
-RUN python3 manage.py create_tables
-RUN apt update && apt upgrade && apt install sqlite3

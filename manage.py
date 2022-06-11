@@ -5,20 +5,19 @@ import pathlib
 
 
 def create_app(directory):
-    path_obj = pathlib.Path() / 'miscellaneous'
-    for objs in pathlib.Path('').iterdir():
+    path_obj = pathlib.Path() / "miscellaneous"
+    for objs in pathlib.Path("").iterdir():
         if objs.name == directory:
             print("directory already exists")
             return
     create_dir = pathlib.Path(directory)
     create_dir.mkdir(parents=True, exist_ok=True)
     for dummy_file in path_obj.iterdir():
-        file_name = dummy_file.name.replace('.txt', '.py')
+        file_name = dummy_file.name.replace(".txt", ".py")
         path = create_dir / file_name
-        with path.open('w', encoding='utf-8') as f:
-            if file_name.startswith('urls'):
-                f.write(dummy_file.read_text().format(
-                    directory, directory, directory))
+        with path.open("w", encoding="utf-8") as f:
+            if file_name.startswith("urls"):
+                f.write(dummy_file.read_text().format(directory, directory, directory))
             else:
                 f.write(dummy_file.read_text())
 
@@ -34,19 +33,25 @@ def command_create_tables(*args):
 
 
 def createsuperuser(*args):
-    username = input('username: ')
-    password = input('password:')
+    username = input("username: ")
+    password = input("password:")
     run_async(create_super_user(username, password))
 
 
 def createsuperuserauto(*args):
-    run_async(create_super_user('123', '123'))
+    run_async(create_super_user("123", "123"))
 
 
 commands = {
-    'create_tables': [command_create_tables, "creates table on the database"],
-    "createsuperuser": [createsuperuser, "creates a super user by asking username and password"],
-    "createsuperuserauto": [createsuperuserauto, "creates a superuser without asking username or password"],
+    "create_tables": [command_create_tables, "creates table on the database"],
+    "createsuperuser": [
+        createsuperuser,
+        "creates a super user by asking username and password",
+    ],
+    "createsuperuserauto": [
+        createsuperuserauto,
+        "creates a superuser without asking username or password",
+    ],
     "create_app": [create_app, "creates an app to the current working directory"],
 }
 
@@ -61,7 +66,7 @@ def manage_help():
         print(f"{key} | {value[1]}")
 
 
-commands['help'] = [manage_help, "shows all the commands available"]
+commands["help"] = [manage_help, "shows all the commands available"]
 
 if values := commands.get(main):
     values[0](*extra)

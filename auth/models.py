@@ -11,4 +11,6 @@ class User(Model):
     username = fields.CharField(max_length=20, unique=True)
     password = fields.CharField(max_length=400)
     is_admin = fields.BooleanField(default=False)
-    name = fields.CharField(max_length=20, null=True)
+
+    def __str__(self) -> str:
+        return self.username
