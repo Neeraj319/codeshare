@@ -27,14 +27,13 @@ async def close_db_connection():
 async def create_super_user(username, password):
     await main()
 
-    user = schemas.PydanticUser(
-        username=username, password=password, is_admin=True)
+    user = schemas.PydanticUser(username=username, password=password, is_admin=True)
     await dependencies.add_superuser(user)
     await close_db_connection()
 
 
 async def create_tables():
     await main()
-    await Tortoise.generate_schemas(safe=True)
+    await Tortoise.generate_schemas()
     await close_db_connection()
-    print('created tables successfully')
+    print("created tables successfully")
