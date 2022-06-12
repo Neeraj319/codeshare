@@ -3,7 +3,11 @@ from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 from .dependencies import (
-    create_token, authenticate_user,  add_user, get_user_by_id,)
+    create_token,
+    authenticate_user,
+    add_user,
+    get_user_by_id,
+)
 from .schemas import PydanticUser
 
 

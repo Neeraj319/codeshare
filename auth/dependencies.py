@@ -11,19 +11,19 @@ from codeshare.settings import get_crypto_context, get_oauth_2_scheme
 
 async def add_user(user: PydanticUser) -> User:
     if len(user.password) < 8:
-        print('password is too short')
+        print("password is too short")
         raise HTTPException(
             detail="enter a password of length greater than 8",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     if len(user.password) > 80:
-        print('password is too long')
+        print("password is too long")
         raise HTTPException(
             detail="password too long",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     if await User.get_or_none(username=user.username):
-        print('username already exists')
+        print("username already exists")
         raise HTTPException(
             detail="username already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -31,9 +31,9 @@ async def add_user(user: PydanticUser) -> User:
     password = get_crypto_context().hash(user.password)
     created_user = await User.create(username=user.username, password=password)
     user = {
-        'id': created_user.id,
-        'username': created_user.username,
-        'is_admin': created_user.is_admin
+        "id": created_user.id,
+        "username": created_user.username,
+        "is_admin": created_user.is_admin,
     }
     return user
 
@@ -52,8 +52,7 @@ async def create_token(user):
     expire = datetime.utcnow() + timedelta(days=7)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode, os.environ["SECRET_KEY"], algorithm=os.environ.get(
-            "ALGORITHM")
+        to_encode, os.environ["SECRET_KEY"], algorithm=os.environ.get("ALGORITHM")
     )
     return encoded_jwt
 
@@ -83,10 +82,6 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
 
 async def get_user_by_id(user_id: int):
     if user := await User.get_or_none(id=user_id):
-        return {
-            'id': user.id,
-            'username': user.username,
-            'is_admin': user.is_admin
-        }
+        return {"id": user.id, "username": user.username, "is_admin": user.is_admin}
     else:
         return None

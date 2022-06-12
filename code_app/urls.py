@@ -8,15 +8,20 @@ from .views import get_all_code, patch_code, post_code, get_code
 router = APIRouter(prefix="/code", tags=["code"])
 
 router.post(
-    '/add/', status_code=status.HTTP_201_CREATED
+    "/add/",
+    status_code=status.HTTP_201_CREATED,
 )(post_code)
-router.get('/all/',
-           response_model=Page[CodeSchema],)(get_all_code)
+router.get(
+    "/all/",
+    response_model=Page[CodeSchema],
+)(get_all_code)
 
 router.get(
-    '/{slug}/', status_code=status.HTTP_201_CREATED
+    "/{slug}/",
+    status_code=status.HTTP_200_OK,
 )(get_code)
 
 router.patch(
-    '/{slug}/', status_code=status.HTTP_201_CREATED
+    "/{slug}/",
+    status_code=status.HTTP_200_OK,
 )(patch_code)

@@ -7,7 +7,8 @@ async def add_language(language: LanguageSchema):
         return None
     created_language = await Language.create(name=language.name)
     response_language = LanguageSchema(
-        id=created_language.id, name=created_language.name)
+        id=created_language.id, name=created_language.name
+    )
     return response_language
 
 
