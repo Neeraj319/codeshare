@@ -73,6 +73,10 @@ async def delete_user(
         get_super_user,
     ),
 ):
+    """
+    admin specific route username -> username (parameter) of the user
+    deletes the user from the database
+    """
     if not request_user:
         raise HTTPException(
             detail="you are not allowed to view this resource",
@@ -94,6 +98,13 @@ async def patch_user(
         get_super_user,
     ),
 ):
+    """
+        admin specific route username -> username (parameter) of the user
+    {
+      "username": "string",
+      "is_admin": bool
+    }
+    """
     if not request_user:
         raise HTTPException(
             detail="you are not allowed to view this resource",

@@ -68,11 +68,19 @@ async def add_superuser(user: PydanticUser) -> None:
     await User.create(username=user.username, password=password, is_admin=True)
 
 
-async def remove_user(user: User):
+async def remove_user(user: User) -> None:
+    """
+    takes the user as parameter and removes the user from the database
+    """
     await user.delete()
 
 
-async def update_user(user: User, request_data: UserUpdateSchema):
+async def update_user(user: User, request_data: UserUpdateSchema) -> _T:
+    """
+    user -> User model, request_data -> UserUpdateSchema
+    returns the same but updated user
+    """
+    # deleting password cause its not good to update password from here
     if hasattr(request_data, "password"):
         del request_data.password
 
@@ -82,9 +90,4 @@ async def update_user(user: User, request_data: UserUpdateSchema):
                 return (False, "username cannot be empty")
             setattr(user, key, value) if value else ...
     await user.save()
-    user = {
-        "id": user.id,
-        "username": user.username,
-        "is_admin": user.is_admin,
-    }
-    return (True, user)
+    return (True, PydanticUserResponseModel(**user.__dict__))
