@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 from typing import Optional
 
@@ -14,3 +13,4 @@ class PydanticUserResponseModel(BaseModel):
     id: int
     username: str
     is_admin: bool
+    profile_pic: Optional[str] = None
