@@ -1,5 +1,4 @@
 from fastapi.exceptions import HTTPException
-from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 from .dependencies import (
@@ -8,14 +7,14 @@ from .dependencies import (
     add_user,
     get_user_by_username,
 )
-from .schemas import PydanticUser
+from .schemas import UserSchema
 
 
-async def signup(user: PydanticUser, request: Request):
+async def signup(user: UserSchema, request: Request):
     return await add_user(user)
 
 
-async def login(credentials: PydanticUser):
+async def login(credentials: UserSchema):
     if user := await authenticate_user(
         username=credentials.username, password=credentials.password
     ):

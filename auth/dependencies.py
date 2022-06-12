@@ -3,13 +3,18 @@ from fastapi.param_functions import Depends
 from .models import User
 from fastapi import status, HTTPException
 import os
-from .schemas import PydanticUser
+from .schemas import UserSchema, UserResponseSchema
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from codeshare.settings import get_crypto_context, get_oauth_2_scheme
+from typing import NewType, Union
 
 
-async def add_user(user: PydanticUser) -> User:
+async def add_user(user: UserSchema) -> User:
+    """
+    basically adds user to the database by doing bunch of checks
+    """
+    # password validation
     if len(user.password) < 8:
         print("password is too short")
         raise HTTPException(
@@ -27,30 +32,44 @@ async def add_user(user: PydanticUser) -> User:
             detail="username is empty",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    # check for unique username
     if await User.get_or_none(username=user.username):
         print("username already exists")
         raise HTTPException(
             detail="username already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    # generating password hash
     password = get_crypto_context().hash(user.password)
+    # saving the user to the database
     created_user = await User.create(username=user.username, password=password)
-    user = {
-        "id": created_user.id,
-        "username": created_user.username,
-        "is_admin": created_user.is_admin,
-    }
-    return user
+    return UserResponseSchema(**created_user.__dict__)
 
 
 async def authenticate_user(username: str, password: str):
+    """
+    verifies weather the user exists in database or not
+    and validates the password
+    """
     if user := await User.get_or_none(username=username):
         if not get_crypto_context().verify(password, user.password):
             return False
         return user
 
 
-async def create_token(user):
+JWT = NewType(
+    "JWT",
+    {"username": str, "is_admin": bool, "id": int},
+)
+
+
+async def create_token(user: UserSchema) -> JWT:
+    """
+    (do not pass password even if you do i will delete it :) )\n
+    function to to create a jwt token of passed user
+    returns the created JWT token
+
+    """
     to_encode = dict(user)
     del to_encode["password"]
 
@@ -62,7 +81,13 @@ async def create_token(user):
     return encoded_jwt
 
 
-async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
+async def get_user_from_token(
+    token: str = Depends(get_oauth_2_scheme()),
+) -> Union[User, None]:
+    """
+    token -> JWT token \n
+    validates token and returns User object or None
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -85,5 +110,9 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
         raise credentials_exception
 
 
-async def get_user_by_username(username: str):
+async def get_user_by_username(username: str) -> Union[User, None]:
+    """
+    username -> username of the user\n
+    returns the User or None
+    """
     return await User.get_or_none(username=username)

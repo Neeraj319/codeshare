@@ -2,14 +2,14 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class PydanticUser(BaseModel):
+class UserSchema(BaseModel):
     id: Optional[int] = None
     username: str
     password: str
     is_admin: Optional[bool] = False
 
 
-class PydanticUserResponseModel(BaseModel):
+class UserResponseSchema(BaseModel):
     id: int
     username: str
     is_admin: bool

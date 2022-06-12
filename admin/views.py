@@ -5,11 +5,11 @@ from fastapi import Request
 
 from auth.dependencies import get_user_by_username
 from .dependencies import get_super_user, add_user, get_users, remove_user, update_user
-from auth.schemas import PydanticUser, UserUpdateSchema
+from auth.schemas import UserSchema, UserUpdateSchema
 from fastapi_pagination import paginate
 
 
-async def users(request: Request, admin_user: PydanticUser = Depends(get_super_user)):
+async def users(request: Request, admin_user: UserSchema = Depends(get_super_user)):
     """
         returns all the users from the database in paginated form
         only superusers/admins are allowed to access this route
@@ -36,9 +36,9 @@ async def users(request: Request, admin_user: PydanticUser = Depends(get_super_u
 
 
 async def create_user(
-    user: PydanticUser,
+    user: UserSchema,
     request: Request,
-    request_user: PydanticUser = Depends(get_super_user),
+    request_user: UserSchema = Depends(get_super_user),
 ):
     """
         admin specific route pass the following to the body
@@ -69,7 +69,7 @@ async def create_user(
 
 async def delete_user(
     username: str,
-    request_user: PydanticUser = Depends(
+    request_user: UserSchema = Depends(
         get_super_user,
     ),
 ):
@@ -94,7 +94,7 @@ async def delete_user(
 async def patch_user(
     username: str,
     user: UserUpdateSchema,
-    request_user: PydanticUser = Depends(
+    request_user: UserSchema = Depends(
         get_super_user,
     ),
 ):

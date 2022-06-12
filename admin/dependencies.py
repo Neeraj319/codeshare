@@ -1,7 +1,7 @@
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
 from auth.models import User
-from auth.schemas import PydanticUser, PydanticUserResponseModel, UserUpdateSchema
+from auth.schemas import UserSchema, UserResponseSchema, UserUpdateSchema
 from codeshare.settings import get_crypto_context
 from auth.dependencies import get_user_from_token
 from typing import List, Tuple, Union
@@ -9,7 +9,7 @@ from typing import List, Tuple, Union
 _T = Tuple[bool, str]
 
 
-async def add_user(user: PydanticUser) -> Union[_T, User]:
+async def add_user(user: UserSchema) -> Union[_T, UserResponseSchema]:
     """
     takes the user pydantic model as parameter (id, username, password, is_admin)
     adds the new user to the database and returns a tuple (bool, User)
@@ -25,19 +25,15 @@ async def add_user(user: PydanticUser) -> Union[_T, User]:
     created_user = await User.create(
         username=user.username, password=password, is_admin=user.is_admin
     )
-    user = {
-        "id": created_user.id,
-        "username": created_user.username,
-        "is_admin": created_user.is_admin,
-    }
-    return (True, user)
+
+    return (True, UserResponseSchema(**created_user.__dict__))
 
 
 async def get_super_user(
-    user: PydanticUser = Depends(get_user_from_token),
-) -> Union[PydanticUser, None]:
+    user: UserSchema = Depends(get_user_from_token),
+) -> Union[User, None]:
     """
-    takes the PydanticUser schema class
+    takes the UserSchema schema class
     -> returns if the user is not a superuser
     else returns the user
 
@@ -48,17 +44,17 @@ async def get_super_user(
         return None
 
 
-async def get_users() -> List[PydanticUserResponseModel]:
+async def get_users() -> List[UserResponseSchema]:
     """
     returns all the users from the database in a list
     """
     users = await User.all().values("id", "username", "is_admin")
-    return [PydanticUserResponseModel(**user) for user in users]
+    return [UserResponseSchema(**user) for user in users]
 
 
-async def add_superuser(user: PydanticUser) -> None:
+async def add_superuser(user: UserSchema) -> None:
     """
-    takes the PydanticUser as parameter and creates the user if
+    takes the UserSchema as parameter and creates the user if
     user if same username is not passes returns None
     """
     if await User.get_or_none(username=user.username):
@@ -75,7 +71,9 @@ async def remove_user(user: User) -> None:
     await user.delete()
 
 
-async def update_user(user: User, request_data: UserUpdateSchema) -> _T:
+async def update_user(
+    user: User, request_data: UserUpdateSchema
+) -> Union[_T, UserResponseSchema]:
     """
     user -> User model, request_data -> UserUpdateSchema
     returns the same but updated user
@@ -90,4 +88,4 @@ async def update_user(user: User, request_data: UserUpdateSchema) -> _T:
                 return (False, "username cannot be empty")
             setattr(user, key, value) if value else ...
     await user.save()
-    return (True, PydanticUserResponseModel(**user.__dict__))
+    return (True, UserResponseSchema(**user.__dict__))
