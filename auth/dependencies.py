@@ -22,6 +22,11 @@ async def add_user(user: PydanticUser) -> User:
             detail="password too long",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    if user.username == "":
+        raise HTTPException(
+            detail="username is empty",
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+        )
     if await User.get_or_none(username=user.username):
         print("username already exists")
         raise HTTPException(
@@ -80,5 +85,5 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
         raise credentials_exception
 
 
-async def get_user_by_id(user_id: int):
-    return User.get_or_none(id=user_id)
+async def get_user_by_username(username: str):
+    return await User.get_or_none(username=username)

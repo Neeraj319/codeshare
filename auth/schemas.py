@@ -14,3 +14,9 @@ class PydanticUserResponseModel(BaseModel):
     username: str
     is_admin: bool
     profile_pic: Optional[str] = None
+
+
+class UserUpdateSchema(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+    is_admin: Optional[bool] = None

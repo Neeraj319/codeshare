@@ -4,7 +4,7 @@ services:
     build: .
     ports:
       - 8000:8000
-    command: poetry run uvicorn --host 0.0.0.0 main:app --reload
+    command: uvicorn --host 0.0.0.0 main:app --reload
     volumes:
       - .:/app
     environment:

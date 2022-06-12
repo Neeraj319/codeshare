@@ -3,9 +3,9 @@ from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 
-from auth.dependencies import get_user_by_id
-from .dependencies import get_super_user, add_user, get_users, remove_user
-from auth.schemas import PydanticUser
+from auth.dependencies import get_user_by_username
+from .dependencies import get_super_user, add_user, get_users, remove_user, update_user
+from auth.schemas import PydanticUser, UserUpdateSchema
 from fastapi_pagination import paginate
 
 
@@ -68,7 +68,7 @@ async def create_user(
 
 
 async def delete_user(
-    user_id: int,
+    username: str,
     request_user: PydanticUser = Depends(
         get_super_user,
     ),
@@ -78,9 +78,35 @@ async def delete_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user := await get_user_by_id(user_id=user_id):
+    if user := await get_user_by_username(username=username):
         await remove_user(user=user)
         return {"message": "user deleted"}
+    raise HTTPException(
+        detail="user not found",
+        status_code=status.HTTP_404_NOT_FOUND,
+    )
+
+
+async def patch_user(
+    username: str,
+    user: UserUpdateSchema,
+    request_user: PydanticUser = Depends(
+        get_super_user,
+    ),
+):
+    if not request_user:
+        raise HTTPException(
+            detail="you are not allowed to view this resource",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    if user_from_db := await get_user_by_username(username=username):
+        result = await update_user(user=user_from_db, request_data=user)
+        if not result[0]:
+            raise HTTPException(
+                detail=result[1],
+                status_code=status.HTTP_409_CONFLICT,
+            )
+        return result[1]
     raise HTTPException(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,

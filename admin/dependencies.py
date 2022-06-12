@@ -1,7 +1,7 @@
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
 from auth.models import User
-from auth.schemas import PydanticUser, PydanticUserResponseModel
+from auth.schemas import PydanticUser, PydanticUserResponseModel, UserUpdateSchema
 from codeshare.settings import get_crypto_context
 from auth.dependencies import get_user_from_token
 from typing import List, Tuple, Union
@@ -70,3 +70,21 @@ async def add_superuser(user: PydanticUser) -> None:
 
 async def remove_user(user: User):
     await user.delete()
+
+
+async def update_user(user: User, request_data: UserUpdateSchema):
+    if hasattr(request_data, "password"):
+        del request_data.password
+
+    for key, value in request_data:
+        if (item := getattr(user, key)) and item != value:
+            if key == "username" and value == "":
+                return (False, "username cannot be empty")
+            setattr(user, key, value) if value else ...
+    await user.save()
+    user = {
+        "id": user.id,
+        "username": user.username,
+        "is_admin": user.is_admin,
+    }
+    return (True, user)
