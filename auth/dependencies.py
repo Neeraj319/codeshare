@@ -81,7 +81,4 @@ async def get_user_from_token(token: str = Depends(get_oauth_2_scheme())):
 
 
 async def get_user_by_id(user_id: int):
-    if user := await User.get_or_none(id=user_id):
-        return {"id": user.id, "username": user.username, "is_admin": user.is_admin}
-    else:
-        return None
+    return User.get_or_none(id=user_id)

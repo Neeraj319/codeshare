@@ -2,7 +2,9 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
-from .dependencies import get_super_user, add_user, get_users
+
+from auth.dependencies import get_user_by_id
+from .dependencies import get_super_user, add_user, get_users, remove_user
 from auth.schemas import PydanticUser
 from fastapi_pagination import paginate
 
@@ -63,3 +65,23 @@ async def create_user(
         )
     else:
         return user[1]
+
+
+async def delete_user(
+    user_id: int,
+    request_user: PydanticUser = Depends(
+        get_super_user,
+    ),
+):
+    if not request_user:
+        raise HTTPException(
+            detail="you are not allowed to view this resource",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    if user := await get_user_by_id(user_id=user_id):
+        await remove_user(user=user)
+        return {"message": "user deleted"}
+    raise HTTPException(
+        detail="user not found",
+        status_code=status.HTTP_404_NOT_FOUND,
+    )

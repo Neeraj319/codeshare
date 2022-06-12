@@ -66,3 +66,7 @@ async def add_superuser(user: PydanticUser) -> None:
         return
     password = get_crypto_context().hash(user.password)
     await User.create(username=user.username, password=password, is_admin=True)
+
+
+async def remove_user(user: User):
+    await user.delete()

@@ -34,6 +34,11 @@ async def get_code(slug: str):
 async def get_all_code(
     user: auth_schemas.PydanticUser = Depends(admin_dependency.get_super_user),
 ):
+    if not user:
+        raise HTTPException(
+            detail="you are not allowed to update this code",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
     return paginate(await dependencies.get_all_from_db())
 
 
@@ -43,12 +48,31 @@ async def patch_code(
     user: auth_schemas.PydanticUser = Depends(auth_dependency.get_user_from_token),
 ):
     if code_from_db := await dependencies.get_code_by_slug(slug=slug):
-        print(code_from_db)
-        if code_from_db.user.id == user.id:
-            await dependencies.update_code(code=code_from_db, request_data=code)
-            return code
+
+        if code_from_db.user_id == user.id:
+            return await dependencies.update_code(code=code_from_db, request_data=code)
         raise HTTPException(
             detail="you are not allowed to update this code",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    else:
+        raise HTTPException(
+            detail="Code not found", status_code=status.HTTP_404_NOT_FOUND
+        )
+
+
+async def delete_code(
+    slug: str,
+    user: auth_schemas.PydanticUser = Depends(auth_dependency.get_user_from_token),
+):
+
+    if code_from_db := await dependencies.get_code_by_slug(slug=slug):
+        if code_from_db.user_id == user.id:
+            await dependencies.remove_code(code=code_from_db)
+            return {
+                "message": "Code deleted successfully",
+            }
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     else:

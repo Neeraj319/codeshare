@@ -1,3 +1,4 @@
+from tomlkit import value
 from code_app.schemas import CodeSchema
 from .models import Code
 from auth.models import User
@@ -37,9 +38,15 @@ async def get_all_from_db():
 
 
 async def update_code(code: Code, request_data: CodeSchema):
-    del request_data.id
-    for attr in request_data:
-        if getattr(code, attr[0]):
-            setattr(code, attr[0], attr[1])
+    if request_data.__dict__.get("id"):
+        del request_data.id
+    for key, value in request_data:
+        if value is not None:
+            if (item := getattr(code, key)) and item != value:
+                setattr(code, key, value)
     await code.save()
     return code
+
+
+async def remove_code(code: Code):
+    await code.delete()

@@ -22,3 +22,8 @@ add_pagination(app)
 @app.on_event("shutdown")
 def shutdown():
     asyncio.gather(close_db_connection())
+
+
+@app.get("/")
+def home():
+    return {"message": "Welcome to CodeShare. Nothing is here go to /docs for more"}

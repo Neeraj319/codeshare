@@ -3,7 +3,13 @@ from fastapi_pagination import Page
 from starlette import status
 
 from code_app.schemas import CodeSchema
-from .views import get_all_code, patch_code, post_code, get_code
+from .views import (
+    delete_code,
+    get_all_code,
+    patch_code,
+    post_code,
+    get_code,
+)
 
 router = APIRouter(prefix="/code", tags=["code"])
 
@@ -25,3 +31,7 @@ router.patch(
     "/{slug}/",
     status_code=status.HTTP_200_OK,
 )(patch_code)
+router.delete(
+    "/{slug}/",
+    status_code=status.HTTP_200_OK,
+)(delete_code)
