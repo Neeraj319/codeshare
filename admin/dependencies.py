@@ -1,17 +1,19 @@
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
-from auth.models import User
-from auth.schemas import UserSchema, UserResponseSchema, UserUpdateSchema
+from auth import models as auth_models
+from auth import schemas as auth_schemas
 from codeshare.settings import get_crypto_context
-from auth.dependencies import get_user_from_token
+from auth import dependencies as auth_dependencies
 from typing import List, Tuple, Union
 from tortoise.queryset import QuerySet
-from code_app import models as codemodel
+from code_app import models as codemodels
 
 _T = Tuple[bool, str]
 
 
-async def add_user(user: UserSchema) -> Union[_T, UserResponseSchema]:
+async def add_user(
+    user: auth_schemas.UserSchema,
+) -> Union[_T, auth_schemas.UserResponseSchema]:
     """
     takes the user pydantic model as parameter (id, username, password, is_admin)
     adds the new user to the database and returns a tuple (bool, User)
@@ -20,20 +22,20 @@ async def add_user(user: UserSchema) -> Union[_T, UserResponseSchema]:
         return (False, "enter a password of length greater than 8")
     if len(user.password) > 80:
         return (False, "your password is too long")
-    if await User.get_or_none(username=user.username):
+    if await auth_models.User.get_or_none(username=user.username):
         return (False, "username already exists")
     password = get_crypto_context().hash(user.password)
 
-    created_user = await User.create(
+    created_user = await auth_models.User.create(
         username=user.username, password=password, is_admin=user.is_admin
     )
 
-    return (True, UserResponseSchema(**created_user.__dict__))
+    return (True, auth_schemas.UserResponseSchema(**created_user.__dict__))
 
 
 async def get_super_user(
-    user: UserSchema = Depends(get_user_from_token),
-) -> Union[User, None]:
+    user: auth_schemas.UserSchema = Depends(auth_dependencies.get_user_from_token),
+) -> Union[auth_models.User, None]:
     """
     takes the UserSchema schema class
     -> returns if the user is not a superuser
@@ -46,27 +48,29 @@ async def get_super_user(
         return None
 
 
-async def get_users() -> List[UserResponseSchema]:
+async def get_users() -> List[auth_schemas.UserResponseSchema]:
     """
     returns all the users from the database in a list
     """
-    users = await User.all().values("id", "username", "is_admin")
-    return [UserResponseSchema(**user) for user in users]
+    users = await auth_models.User.all().values("id", "username", "is_admin")
+    return [auth_schemas.UserResponseSchema(**user) for user in users]
 
 
-async def add_superuser(user: UserSchema) -> None:
+async def add_superuser(user: auth_schemas.UserSchema) -> None:
     """
     takes the UserSchema as parameter and creates the user if
     user if same username is not passes returns None
     """
-    if await User.get_or_none(username=user.username):
+    if await auth_models.User.get_or_none(username=user.username):
         print("username already exists")
         return
     password = get_crypto_context().hash(user.password)
-    await User.create(username=user.username, password=password, is_admin=True)
+    await auth_models.User.create(
+        username=user.username, password=password, is_admin=True
+    )
 
 
-async def remove_user(user: User) -> None:
+async def remove_user(user: auth_models.User) -> None:
     """
     takes the user as parameter and removes the user from the database
     """
@@ -74,8 +78,8 @@ async def remove_user(user: User) -> None:
 
 
 async def update_user(
-    user: User, request_data: UserUpdateSchema
-) -> Union[_T, UserResponseSchema]:
+    user: auth_models.User, request_data: auth_schemas.UserUpdateSchema
+) -> Union[_T, auth_schemas.UserResponseSchema]:
     """
     user -> User model, request_data -> UserUpdateSchema
     returns the same but updated user
@@ -90,11 +94,11 @@ async def update_user(
                 return (False, "username cannot be empty")
             setattr(user, key, value) if value else ...
     await user.save()
-    return (True, UserResponseSchema(**user.__dict__))
+    return (True, auth_schemas.UserResponseSchema(**user.__dict__))
 
 
-async def get_all_from_db() -> QuerySet[codemodel.Code]:
+async def get_all_from_db() -> QuerySet[codemodels.Code]:
     """
     returns Code QuerySet from the db
     """
-    return await codemodel.Code.all()
+    return await codemodels.Code.all()

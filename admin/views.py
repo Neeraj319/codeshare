@@ -3,16 +3,18 @@ from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 from auth import schemas as auth_schema
-from code_app import dependencies as code_dependency
-from auth.dependencies import get_user_by_username
+from auth import dependencies as auth_dependencies
+
+# if from the same app i haven't used different namespace
 from .dependencies import get_super_user, add_user, get_users, remove_user, update_user
-from auth.schemas import UserSchema, UserUpdateSchema
 from fastapi_pagination import paginate
 
 from admin import dependencies
 
 
-async def users(request: Request, admin_user: UserSchema = Depends(get_super_user)):
+async def users(
+    request: Request, admin_user: auth_schema.UserSchema = Depends(get_super_user)
+):
     """
         returns all the users from the database in paginated form
         only superusers/admins are allowed to access this route
@@ -39,9 +41,9 @@ async def users(request: Request, admin_user: UserSchema = Depends(get_super_use
 
 
 async def create_user(
-    user: UserSchema,
+    user: auth_schema.UserSchema,
     request: Request,
-    request_user: UserSchema = Depends(get_super_user),
+    request_user: auth_schema.UserSchema = Depends(get_super_user),
 ):
     """
         admin specific route pass the following to the body
@@ -72,7 +74,7 @@ async def create_user(
 
 async def delete_user(
     username: str,
-    request_user: UserSchema = Depends(
+    request_user: auth_schema.UserSchema = Depends(
         get_super_user,
     ),
 ):
@@ -85,7 +87,7 @@ async def delete_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user := await get_user_by_username(username=username):
+    if user := await auth_dependencies.get_user_by_username(username=username):
         await remove_user(user=user)
         return {"message": "user deleted"}
     raise HTTPException(
@@ -96,8 +98,8 @@ async def delete_user(
 
 async def patch_user(
     username: str,
-    user: UserUpdateSchema,
-    request_user: UserSchema = Depends(
+    user: auth_schema.UserUpdateSchema,
+    request_user: auth_schema.UserSchema = Depends(
         get_super_user,
     ),
 ):
@@ -113,7 +115,7 @@ async def patch_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user_from_db := await get_user_by_username(username=username):
+    if user_from_db := await auth_dependencies.get_user_by_username(username=username):
         result = await update_user(user=user_from_db, request_data=user)
         if not result[0]:
             raise HTTPException(
