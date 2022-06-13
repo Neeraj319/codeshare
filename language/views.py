@@ -1,7 +1,7 @@
 from typing import List, Union
 from fastapi import Depends, HTTPException
 from admin.dependencies import get_super_user
-from auth.schemas import PydanticUser
+from auth.schemas import UserSchema
 from language.models import Language
 from .schemas import LanguageSchema
 from starlette import status
@@ -9,7 +9,7 @@ from language import dependencies
 
 
 async def post_language(
-    language: LanguageSchema, user: PydanticUser = Depends(get_super_user)
+    language: LanguageSchema, user: UserSchema = Depends(get_super_user)
 ):
     if not user:
 
@@ -43,7 +43,7 @@ async def get_language(id: int):
 
 
 async def patch_language(
-    id: int, language: LanguageSchema, user: PydanticUser = Depends(get_super_user)
+    id: int, language: LanguageSchema, user: UserSchema = Depends(get_super_user)
 ):
     if not user:
         raise HTTPException(
@@ -61,7 +61,7 @@ async def patch_language(
     )
 
 
-async def delete_language(id: int, user: PydanticUser = Depends(get_super_user)):
+async def delete_language(id: int, user: UserSchema = Depends(get_super_user)):
     if not user:
         raise HTTPException(
             detail="you are not allowed to view this resource",
