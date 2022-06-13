@@ -1,24 +1,19 @@
 from fastapi.exceptions import HTTPException
 from starlette import status
 from fastapi import Request
-from .dependencies import (
-    create_token,
-    authenticate_user,
-    add_user,
-    get_user_by_username,
-)
-from .schemas import UserSchema
+from auth import dependencies as auth_dependencies
+from auth import schemas as auth_schemas
 
 
-async def signup(user: UserSchema, request: Request):
-    return await add_user(user)
+async def signup(user: auth_schemas.UserSchema, request: Request):
+    return await auth_dependencies.add_user(user)
 
 
-async def login(credentials: UserSchema):
-    if user := await authenticate_user(
+async def login(credentials: auth_schemas.UserSchema):
+    if user := await auth_dependencies.authenticate_user(
         username=credentials.username, password=credentials.password
     ):
-        return {"token": await create_token(user)}
+        return {"token": await auth_dependencies.create_token(user)}
     else:
         raise HTTPException(
             detail="invalid username or password",
@@ -27,7 +22,7 @@ async def login(credentials: UserSchema):
 
 
 async def user_detail(user_id: int):
-    if user := await get_user_by_username(user_id):
+    if user := await auth_dependencies.get_user_by_username(user_id):
         return user
     else:
         raise HTTPException(

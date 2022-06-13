@@ -1,16 +1,16 @@
 from codeshare.settings import get_crypto_context
 from fastapi.param_functions import Depends
-from .models import User
+from auth import models as auth_models
 from fastapi import status, HTTPException
 import os
-from .schemas import UserSchema, UserResponseSchema
+from auth import schemas as auth_schemas
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from codeshare.settings import get_crypto_context, get_oauth_2_scheme
 from typing import NewType, Union
 
 
-async def add_user(user: UserSchema) -> User:
+async def add_user(user: auth_schemas.UserSchema) -> auth_models.User:
     """
     basically adds user to the database by doing bunch of checks
     """
@@ -33,7 +33,7 @@ async def add_user(user: UserSchema) -> User:
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
     # check for unique username
-    if await User.get_or_none(username=user.username):
+    if await auth_models.User.get_or_none(username=user.username):
         print("username already exists")
         raise HTTPException(
             detail="username already exists",
@@ -42,8 +42,10 @@ async def add_user(user: UserSchema) -> User:
     # generating password hash
     password = get_crypto_context().hash(user.password)
     # saving the user to the database
-    created_user = await User.create(username=user.username, password=password)
-    return UserResponseSchema(**created_user.__dict__)
+    created_user = await auth_models.User.create(
+        username=user.username, password=password
+    )
+    return auth_schemas.UserResponseSchema(**created_user.__dict__)
 
 
 async def authenticate_user(username: str, password: str):
@@ -51,7 +53,7 @@ async def authenticate_user(username: str, password: str):
     verifies weather the user exists in database or not
     and validates the password
     """
-    if user := await User.get_or_none(username=username):
+    if user := await auth_models.User.get_or_none(username=username):
         if not get_crypto_context().verify(password, user.password):
             return False
         return user
@@ -63,7 +65,7 @@ JWT = NewType(
 )
 
 
-async def create_token(user: UserSchema) -> JWT:
+async def create_token(user: auth_schemas.UserSchema) -> JWT:
     """
     (do not pass password even if you do i will delete it :) )\n
     function to to create a jwt token of passed user
@@ -83,7 +85,7 @@ async def create_token(user: UserSchema) -> JWT:
 
 async def get_user_from_token(
     token: str = Depends(get_oauth_2_scheme()),
-) -> Union[User, None]:
+) -> Union[auth_models.User, None]:
     """
     token -> JWT token \n
     validates token and returns User object or None
@@ -104,15 +106,15 @@ async def get_user_from_token(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    if user := await User.get_or_none(username=username):
+    if user := await auth_models.User.get_or_none(username=username):
         return user
     else:
         raise credentials_exception
 
 
-async def get_user_by_username(username: str) -> Union[User, None]:
+async def get_user_by_username(username: str) -> Union[auth_models.User, None]:
     """
     username -> username of the user\n
     returns the User or None
     """
-    return await User.get_or_none(username=username)
+    return await auth_models.User.get_or_none(username=username)
