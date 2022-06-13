@@ -51,7 +51,7 @@ poetry install
 poetry shell
 ```
 
-create tables on the databse
+create tables on the database
 
 ```
 python3 manage.py create_tables
