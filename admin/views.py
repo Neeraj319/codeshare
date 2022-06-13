@@ -2,11 +2,14 @@ from fastapi.exceptions import HTTPException
 from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
-
+from auth import schemas as auth_schema
+from code_app import dependencies as code_dependency
 from auth.dependencies import get_user_by_username
 from .dependencies import get_super_user, add_user, get_users, remove_user, update_user
 from auth.schemas import UserSchema, UserUpdateSchema
 from fastapi_pagination import paginate
+
+from admin import dependencies
 
 
 async def users(request: Request, admin_user: UserSchema = Depends(get_super_user)):
@@ -122,3 +125,14 @@ async def patch_user(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,
     )
+
+
+async def get_all_code(
+    user: auth_schema.UserSchema = Depends(get_super_user),
+):
+    if not user:
+        raise HTTPException(
+            detail="you are not allowed to update this code",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+    return paginate(await dependencies.get_all_from_db())

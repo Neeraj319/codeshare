@@ -5,6 +5,8 @@ from auth.schemas import UserSchema, UserResponseSchema, UserUpdateSchema
 from codeshare.settings import get_crypto_context
 from auth.dependencies import get_user_from_token
 from typing import List, Tuple, Union
+from tortoise.queryset import QuerySet
+from code_app import models as codemodel
 
 _T = Tuple[bool, str]
 
@@ -89,3 +91,10 @@ async def update_user(
             setattr(user, key, value) if value else ...
     await user.save()
     return (True, UserResponseSchema(**user.__dict__))
+
+
+async def get_all_from_db() -> QuerySet[codemodel.Code]:
+    """
+    returns Code QuerySet from the db
+    """
+    return await codemodel.Code.all()
