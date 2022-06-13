@@ -1,3 +1,7 @@
+"""
+main part of the application here all whole application unites into this file 
+"""
+
 from fastapi import FastAPI
 from auth.urls import router
 from codeshare.db_init import main, close_db_connection
