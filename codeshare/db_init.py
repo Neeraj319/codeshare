@@ -1,6 +1,6 @@
 from tortoise import Tortoise
-from auth import schemas
-from admin import dependencies
+from auth import schemas as auth_schemas
+from admin import dependencies as admin_dependencies
 from codeshare.settings import DB_URL, installed_models
 
 
@@ -40,8 +40,8 @@ async def create_super_user(username, password):
     """
 
     await main()
-    user = schemas.UserSchema(username=username, password=password, is_admin=True)
-    await dependencies.add_superuser(user)
+    user = auth_schemas.UserSchema(username=username, password=password, is_admin=True)
+    await admin_dependencies.add_superuser(user)
     await close_db_connection()
 
 
