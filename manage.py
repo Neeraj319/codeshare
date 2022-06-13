@@ -1,5 +1,5 @@
 import sys
-from codeshare.db_init import create_tables, create_super_user
+from codeshare import db_init
 from tortoise import run_async
 import pathlib
 
@@ -36,17 +36,17 @@ except ValueError:
 
 
 def command_create_tables(*args):
-    run_async(create_tables())
+    run_async(db_init.create_tables())
 
 
 def createsuperuser(*args):
     username = input("username: ")
     password = input("password:")
-    run_async(create_super_user(username, password))
+    run_async(db_init.create_super_user(username, password))
 
 
 def createsuperuserauto(*args):
-    run_async(create_super_user("123", "123"))
+    run_async(db_init.create_super_user("123", "123"))
 
 
 commands = {
