@@ -37,7 +37,7 @@ python3 manage.py create_tables
 #### Without Docker
 
 - Install poetry: https://python-poetry.org/
-- Install postgresql databse from: https://www.postgresql.org/download/
+- Install postgresql database from: https://www.postgresql.org/download/
 
 ```bash
 cd codeshare-back
