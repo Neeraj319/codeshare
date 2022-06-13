@@ -4,16 +4,13 @@ from starlette import status
 from fastapi import Request
 from auth import schemas as auth_schema
 from auth import dependencies as auth_dependencies
-
-# if from the same app i haven't used different namespace
-from .dependencies import get_super_user, add_user, get_users, remove_user, update_user
+from admin import dependencies as admin_dependencies
 from fastapi_pagination import paginate
-
-from admin import dependencies
 
 
 async def users(
-    request: Request, admin_user: auth_schema.UserSchema = Depends(get_super_user)
+    request: Request,
+    admin_user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     """
         returns all the users from the database in paginated form
@@ -32,7 +29,7 @@ async def users(
     }
     """
     if admin_user:
-        return paginate(await get_users())
+        return paginate(await admin_dependencies.get_users())
     else:
         raise HTTPException(
             detail="you are not authorized to access this resource",
@@ -43,7 +40,7 @@ async def users(
 async def create_user(
     user: auth_schema.UserSchema,
     request: Request,
-    request_user: auth_schema.UserSchema = Depends(get_super_user),
+    request_user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     """
         admin specific route pass the following to the body
@@ -62,7 +59,7 @@ async def create_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    user = await add_user(user)
+    user = await admin_dependencies.add_user(user)
     if not user[0]:
         raise HTTPException(
             detail=user[1],
@@ -75,7 +72,7 @@ async def create_user(
 async def delete_user(
     username: str,
     request_user: auth_schema.UserSchema = Depends(
-        get_super_user,
+        admin_dependencies.get_super_user,
     ),
 ):
     """
@@ -88,7 +85,7 @@ async def delete_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     if user := await auth_dependencies.get_user_by_username(username=username):
-        await remove_user(user=user)
+        await admin_dependencies.remove_user(user=user)
         return {"message": "user deleted"}
     raise HTTPException(
         detail="user not found",
@@ -100,7 +97,7 @@ async def patch_user(
     username: str,
     user: auth_schema.UserUpdateSchema,
     request_user: auth_schema.UserSchema = Depends(
-        get_super_user,
+        admin_dependencies.get_super_user,
     ),
 ):
     """
@@ -116,7 +113,9 @@ async def patch_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     if user_from_db := await auth_dependencies.get_user_by_username(username=username):
-        result = await update_user(user=user_from_db, request_data=user)
+        result = await admin_dependencies.update_user(
+            user=user_from_db, request_data=user
+        )
         if not result[0]:
             raise HTTPException(
                 detail=result[1],
@@ -130,11 +129,11 @@ async def patch_user(
 
 
 async def get_all_code(
-    user: auth_schema.UserSchema = Depends(get_super_user),
+    user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     if not user:
         raise HTTPException(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return paginate(await dependencies.get_all_from_db())
+    return paginate(await admin_dependencies.get_all_from_db())
