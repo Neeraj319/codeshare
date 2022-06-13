@@ -13,6 +13,8 @@ def create_app(directory):
     create_dir = pathlib.Path(directory)
     create_dir.mkdir(parents=True, exist_ok=True)
     for dummy_file in path_obj.iterdir():
+        if dummy_file.name == "Readme.md":
+            continue
         file_name = dummy_file.name.replace(".txt", ".py")
         path = create_dir / file_name
         with path.open("w", encoding="utf-8") as f:
