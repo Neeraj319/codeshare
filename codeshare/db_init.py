@@ -5,6 +5,10 @@ from codeshare.settings import DB_URL, installed_models
 
 
 class DBConnector:
+    """
+    context manager for database connection
+    """
+
     def __init__(self, db_url, modules) -> None:
         self.db_url = db_url
         self.modules = modules
@@ -17,22 +21,34 @@ class DBConnector:
 
 
 async def main():
+    """
+    function to make connection to the database
+    """
     await Tortoise.init(db_url=DB_URL, modules={"models": installed_models})
 
 
 async def close_db_connection():
+    """
+    closes connection from the database
+    """
     await Tortoise.close_connections()
 
 
 async def create_super_user(username, password):
-    await main()
+    """ "
+    this function creates superuser on the databse
+    """
 
-    user = schemas.PydanticUser(username=username, password=password, is_admin=True)
+    await main()
+    user = schemas.UserSchema(username=username, password=password, is_admin=True)
     await dependencies.add_superuser(user)
     await close_db_connection()
 
 
 async def create_tables():
+    """
+    this function creates tables on the database
+    """
     await main()
     await Tortoise.generate_schemas()
     await close_db_connection()

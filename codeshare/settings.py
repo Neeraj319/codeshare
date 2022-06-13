@@ -1,3 +1,10 @@
+""""
+this is the main file for every config of the system 
+every configuration that the system needs are to be added 
+in this file
+"""
+
+
 import os
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -16,6 +23,7 @@ def get_oauth_2_scheme():
     return OAuth2PasswordBearer(tokenUrl="token")
 
 
+# required models for the application
 installed_models = [
     "auth.models",
     "language.models",
