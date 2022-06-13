@@ -1,17 +1,19 @@
-from .schemas import LanguageSchema
-from .models import Language
+from language import schemas as language_schemas
+from language import models as language_models
 from typing import Union
 from tortoise.queryset import QuerySet
 
 
-async def add_language(language: LanguageSchema) -> Union[None, LanguageSchema]:
+async def add_language(
+    language: language_schemas.LanguageSchema,
+) -> Union[None, language_schemas.LanguageSchema]:
     """
     adds language to the database if the language already exists then returns none
     """
-    if await Language.get_or_none(name=language.name):
+    if await language_models.Language.get_or_none(name=language.name):
         return None
-    created_language = await Language.create(name=language.name)
-    response_language = LanguageSchema(
+    created_language = await language_models.Language.create(name=language.name)
+    response_language = language_schemas.LanguageSchema(
         id=created_language.id, name=created_language.name
     )
     return response_language
@@ -22,27 +24,29 @@ async def get_language_fromdb(id: int):
     takes id: int returns language of particular id from the database
     or None if it dose not exists
     """
-    if language := await Language.get_or_none(id=id):
-        return LanguageSchema(name=language.name, id=language.id)
+    if language := await language_models.Language.get_or_none(id=id):
+        return language_schemas.LanguageSchema(name=language.name, id=language.id)
 
     return None
 
 
-async def non_schema_get_language(id: int) -> Union[Language, None]:
+async def non_schema_get_language(id: int) -> Union[language_models.Language, None]:
     """
     returns Language object if exists else None
     """
-    return await Language.get_or_none(id=id)
+    return await language_models.Language.get_or_none(id=id)
 
 
-async def all_languages() -> QuerySet[Language]:
+async def all_languages() -> QuerySet[language_models.Language]:
     """
     returns queryset of all languages from the database
     """
-    return await Language.all()
+    return await language_models.Language.all()
 
 
-async def update_language(language: Language, request_data: LanguageSchema) -> Language:
+async def update_language(
+    language: language_models.Language, request_data: language_schemas.LanguageSchema
+) -> language_models.Language:
     """
     updates a Language row on the database and returns the updated object
 
@@ -55,7 +59,7 @@ async def update_language(language: Language, request_data: LanguageSchema) -> L
     return language
 
 
-async def delete_language(language: Language) -> None:
+async def delete_language(language: language_models.Language) -> None:
     """
     deletes language row from the database
 
