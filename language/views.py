@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 from fastapi import Depends, HTTPException
 from admin.dependencies import get_super_user
 from auth.schemas import UserSchema
@@ -9,8 +9,15 @@ from language import dependencies
 
 
 async def post_language(
-    language: LanguageSchema, user: UserSchema = Depends(get_super_user)
+    language: LanguageSchema,
+    user: UserSchema = Depends(get_super_user),
 ):
+    """
+        admin specific route, creates passed language to the database
+    {
+      "name": "string",
+    }
+    """
     if not user:
 
         raise HTTPException(
@@ -30,11 +37,18 @@ async def post_language(
 # let's keep it like this for some time
 
 
-async def get_all_languages() -> List[Language]:
+async def get_all_languages():
+    """
+    returns queryset of all languages from the database
+    """
     return await dependencies.all_languages()
 
 
 async def get_language(id: int):
+    """
+    returns language of particular id from the database
+
+    """
     if language := await dependencies.get_language_fromdb(id=id):
         return language
     raise HTTPException(
@@ -43,8 +57,17 @@ async def get_language(id: int):
 
 
 async def patch_language(
-    id: int, language: LanguageSchema, user: UserSchema = Depends(get_super_user)
+    id: int,
+    language: LanguageSchema,
+    user: UserSchema = Depends(get_super_user),
 ):
+    """
+        admin specific route, updates language of particular id from the database
+    {
+    "name": "string",
+    "id": 0
+    }
+    """
     if not user:
         raise HTTPException(
             detail="you are not allowed to view this resource",
@@ -62,6 +85,10 @@ async def patch_language(
 
 
 async def delete_language(id: int, user: UserSchema = Depends(get_super_user)):
+    """
+    admin specific route, deletes language of particular id passed
+    """
+
     if not user:
         raise HTTPException(
             detail="you are not allowed to view this resource",
