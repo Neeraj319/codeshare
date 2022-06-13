@@ -1,16 +1,14 @@
 from fastapi import Depends, HTTPException
 from fastapi_pagination import paginate
-from auth.models import User
-from code_app import dependencies
+from code_app import dependencies as code_app_dependencies
 from auth import dependencies as auth_dependency
-from code_app.models import Code
-from .schemas import CodeSchema, CodeUpdateSchema
+from code_app import schemas as code_app_schemas
 from auth import schemas as auth_schemas
 from starlette import status
 
 
 async def post_code(
-    code: CodeSchema,
+    code: code_app_schemas.CodeSchema,
     user: auth_schemas.UserSchema = Depends(auth_dependency.get_user_from_token),
 ):
     """
@@ -23,7 +21,7 @@ async def post_code(
     }
     """
     # check fro language with given id is necessary
-    if created_code := await dependencies.add_code(
+    if created_code := await code_app_dependencies.add_code(
         code=code, user=user, language_id=code.language_id
     ):
         return created_code
@@ -37,7 +35,7 @@ async def get_code(slug: str):
     """
     returns code object with the given slug else 404 not found
     """
-    if code := await dependencies.get_code_by_slug(slug=slug):
+    if code := await code_app_dependencies.get_code_by_slug(slug=slug):
         return code
     else:
         raise HTTPException(
@@ -51,12 +49,12 @@ async def get_all_code(
     """
     returns all the code objects related to the particular user
     """
-    return paginate(await dependencies.get_all_from_db(user=user))
+    return paginate(await code_app_dependencies.get_all_from_db(user=user))
 
 
 async def patch_code(
     slug: str,
-    code: CodeUpdateSchema,
+    code: code_app_schemas.CodeUpdateSchema,
     user: auth_schemas.UserSchema = Depends(auth_dependency.get_user_from_token),
 ):
     """
@@ -68,10 +66,12 @@ async def patch_code(
     }
 
     """
-    if code_from_db := await dependencies.get_code_by_slug(slug=slug):
+    if code_from_db := await code_app_dependencies.get_code_by_slug(slug=slug):
 
         if code_from_db.user_id == user.id:
-            return await dependencies.update_code(code=code_from_db, request_data=code)
+            return await code_app_dependencies.update_code(
+                code=code_from_db, request_data=code
+            )
         raise HTTPException(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -91,9 +91,9 @@ async def delete_code(
     else if not found 404
     """
 
-    if code_from_db := await dependencies.get_code_by_slug(slug=slug):
+    if code_from_db := await code_app_dependencies.get_code_by_slug(slug=slug):
         if code_from_db.user_id == user.id:
-            await dependencies.remove_code(code=code_from_db)
+            await code_app_dependencies.remove_code(code=code_from_db)
             return {
                 "message": "Code deleted successfully",
             }
