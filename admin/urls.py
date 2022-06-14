@@ -12,6 +12,6 @@ router.get("/users/", response_model=Page[UserResponseSchema])(views.users)
 router.delete("/users/{username}/", status_code=status.HTTP_200_OK)(views.delete_user)
 router.patch("/users/{username}/", status_code=status.HTTP_200_OK)(views.patch_user)
 router.get(
-    "/code/all/",
+    "/code/",
     response_model=Page[code_schema.CodeSchema],
 )(views.get_all_code)

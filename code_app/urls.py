@@ -7,11 +7,11 @@ from code_app import views
 router = APIRouter(prefix="/code", tags=["code"])
 
 router.post(
-    "/add/",
+    "/",
     status_code=status.HTTP_201_CREATED,
 )(views.post_code)
 router.get(
-    "/all/",
+    "/",
     response_model=Page[CodeSchema],
 )(views.get_all_code)
 
