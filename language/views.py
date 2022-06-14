@@ -1,14 +1,14 @@
 from fastapi import Depends, HTTPException
 from admin import dependencies as admin_dependencies
-from auth.schemas import UserSchema
-from .schemas import LanguageSchema
+from auth import schemas as auth_schemas
+from language import schemas as language_schemas
 from starlette import status
 from language import services as language_services
 
 
 async def post_language(
-    language: LanguageSchema,
-    user: UserSchema = Depends(admin_dependencies.get_super_user),
+    language: language_schemas.LanguageSchema,
+    user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     """
         admin specific route, creates passed language to the database
@@ -56,8 +56,8 @@ async def get_language(id: int):
 
 async def patch_language(
     id: int,
-    language: LanguageSchema,
-    user: UserSchema = Depends(admin_dependencies.get_super_user),
+    language: language_schemas.LanguageSchema,
+    user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     """
         admin specific route, updates language of particular id from the database
@@ -83,7 +83,7 @@ async def patch_language(
 
 
 async def delete_language(
-    id: int, user: UserSchema = Depends(admin_dependencies.get_super_user)
+    id: int, user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user)
 ):
     """
     admin specific route, deletes language of particular id passed
