@@ -87,6 +87,12 @@ start the server
 uvicorn main:app --reload
 ```
 
+#### For more commands
+
+```
+python3 manage.py help
+```
+
 ##### Visit /docs for the documentation of the API
 
 ## Contributing
