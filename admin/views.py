@@ -3,9 +3,10 @@ from fastapi.param_functions import Depends
 from starlette import status
 from fastapi import Request
 from auth import schemas as auth_schema
-from auth import dependencies as auth_dependencies
+from auth import services as auth_services
 from admin import dependencies as admin_dependencies
 from fastapi_pagination import paginate
+from admin import services as admin_services
 
 
 async def users(
@@ -29,7 +30,7 @@ async def users(
     }
     """
     if admin_user:
-        return paginate(await admin_dependencies.get_users())
+        return paginate(await admin_services.get_users())
     else:
         raise HTTPException(
             detail="you are not authorized to access this resource",
@@ -59,7 +60,7 @@ async def create_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    user = await admin_dependencies.add_user(user)
+    user = await admin_services.add_user(user)
     if not user[0]:
         raise HTTPException(
             detail=user[1],
@@ -84,8 +85,8 @@ async def delete_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user := await auth_dependencies.get_user_by_username(username=username):
-        await admin_dependencies.remove_user(user=user)
+    if user := await auth_services.get_user_by_username(username=username):
+        await admin_services.remove_user(user=user)
         return {"message": "user deleted"}
     raise HTTPException(
         detail="user not found",
@@ -112,10 +113,8 @@ async def patch_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user_from_db := await auth_dependencies.get_user_by_username(username=username):
-        result = await admin_dependencies.update_user(
-            user=user_from_db, request_data=user
-        )
+    if user_from_db := await auth_services.get_user_by_username(username=username):
+        result = await admin_services.update_user(user=user_from_db, request_data=user)
         if not result[0]:
             raise HTTPException(
                 detail=result[1],
@@ -136,4 +135,4 @@ async def get_all_code(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return paginate(await admin_dependencies.get_all_from_db())
+    return paginate(await admin_services.get_all_from_db())
