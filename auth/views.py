@@ -6,10 +6,29 @@ from auth import services as auth_services
 
 
 async def signup(user: auth_schemas.UserSchema, request: Request):
+    """
+        route for creating user on the database only non admins can be created from this route
+        dose not matter if you send (is_admin, id) or not backend will remove it
+    {
+      "username": "string",
+      "password": "string",
+    }
+
+    """
+
     return await auth_services.add_user(user)
 
 
 async def login(credentials: auth_schemas.UserSchema):
+    """
+        this route returns `JWT` Token of an user on the database
+        every time this route is visited with correct credentials Token gets reset
+        only send the data written in docs
+    {
+      "username": "string",
+      "password": "string"
+    }
+    """
     if user := await auth_services.authenticate_user(
         username=credentials.username, password=credentials.password
     ):
@@ -22,6 +41,9 @@ async def login(credentials: auth_schemas.UserSchema):
 
 
 async def user_detail(user_id: int):
+    """
+    returns user with the given id
+    """
     if user := await auth_services.get_user_by_username(user_id):
         return user
     else:
