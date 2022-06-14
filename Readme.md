@@ -15,7 +15,7 @@ and Nest JS.
 Clone the project
 
 ```bash
-  git clone https://github.com/devsargam/codeshare-back
+  git clone https://github.com/Neeraj319/codeshare
 ```
 
 #### With Docker
@@ -101,4 +101,4 @@ Contributions are always welcome!
 
 See `contributing.md` for ways to get started.
 
-Please adhere to this project's [code_of_conduct.md](https://github.com/devsargam/codeshare-back/blob/main/code_of_conduct.md).
+Please adhere to this project's [code_of_conduct.md](https://github.com/Neeraj319/codeshare/blob/main/code_of_conduct.md).
