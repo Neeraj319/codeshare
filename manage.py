@@ -49,6 +49,8 @@ def createsuperuserauto(*args):
     run_async(db_init.create_super_user("123", "123"))
 
 
+# first item of each list contains the function to be called
+# second item contains info about the command
 commands = {
     "create_tables": [command_create_tables, "creates table on the database"],
     "createsuperuser": [
