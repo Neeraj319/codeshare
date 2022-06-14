@@ -30,6 +30,30 @@ cd codeshare-back
 sudo docker-compose up --build
 ```
 
+for creating tables on the database
+
+- open a new terminal session
+
+```
+sudo docker ps
+```
+
+it should output something like this
+
+```
+CONTAINER ID   IMAGE                COMMAND                  CREATED        STATUS         PORTS                    NAMES
+de7cabbe0217   codeshare-back_app   "uvicorn --host 0.0.…"   38 hours ago   Up 7 seconds   0.0.0.0:8000->8000/tcp   codeshare-back_app_1
+98dfb820c760   postgres:13-alpine   "docker-entrypoint.s…"   38 hours ago   Up 9 seconds   0.0.0.0:5432->5432/tcp   codeshare-back_db_1
+```
+
+now remember the container's id which is running uvicorn in my case it is `de7cabbe0217` copy the id
+
+```
+sudo docker exec -it de7cabbe0217 bash
+```
+
+now run the following command on the container
+
 ```
 python3 manage.py create_tables
 ```
