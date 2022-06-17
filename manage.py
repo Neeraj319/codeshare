@@ -10,6 +10,7 @@ def create_app(directory):
     __init__.py, dependencies.py, schemas.py, views.py,
     models.py, urls.py
     """
+
     path_obj = pathlib.Path() / "miscellaneous"
     for objs in pathlib.Path("").iterdir():
         if objs.name == directory:

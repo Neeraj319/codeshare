@@ -3,7 +3,6 @@ FROM python:3.10-slim-buster
 ARG POETRY_VERSION=1.1.12
 
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH "${PYTHONPATH}:/app"
 ENV HASH_FUNCTION=bcrypt
 ENV SECRET_KEY=skdfhakjsfhakljfdhalkjfh8736483248372648372hjkdhfakjlhdsfjka
 ENV ALGORITHM=HS256
@@ -15,5 +14,8 @@ WORKDIR /app
 
 COPY poetry.lock pyproject.toml /app/
 
-COPY . /app/
-RUN poetry install --no-interaction --no-ansi
+COPY . /app
+RUN ["poetry", "install", "--no-interaction", "--no-ansi"]
+
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
