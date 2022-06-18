@@ -21,7 +21,7 @@ async def post_code(
     }
     """
     # check fro language with given id is necessary
-    if created_code := await code_app_services.add_code(
+    if created_code := code_app_services.add_code(
         code=code, user=user, language_id=code.language_id
     ):
         return created_code
@@ -35,7 +35,7 @@ async def get_code(slug: str):
     """
     returns code object with the given slug else 404 not found
     """
-    if code := await code_app_services.get_code_by_slug(slug=slug):
+    if code := code_app_services.get_code_by_slug(slug=slug):
         return code
     else:
         raise HTTPException(
@@ -49,7 +49,7 @@ async def get_all_code(
     """
     returns all the code objects related to the particular user
     """
-    return paginate(await code_app_services.get_all_from_db(user=user))
+    return paginate(code_app_services.get_all_from_db(user=user))
 
 
 async def patch_code(
@@ -66,11 +66,14 @@ async def patch_code(
     }
 
     """
-    if code_from_db := await code_app_services.get_code_by_slug(slug=slug):
-
+    if code_from_db := code_app_services.get_code_by_slug(slug=slug):
         if code_from_db.user_id == user.id:
-            return await code_app_services.update_code(
+            if updated_code := code_app_services.update_code(
                 code=code_from_db, request_data=code
+            ):
+                return updated_code
+            raise HTTPException(
+                detail="Language not found", status_code=status.HTTP_404_NOT_FOUND
             )
         raise HTTPException(
             detail="you are not allowed to update this code",
@@ -91,9 +94,9 @@ async def delete_code(
     else if not found 404
     """
 
-    if code_from_db := await code_app_services.get_code_by_slug(slug=slug):
+    if code_from_db := code_app_services.get_code_by_slug(slug=slug):
         if code_from_db.user_id == user.id:
-            await code_app_services.remove_code(code=code_from_db)
+            code_app_services.remove_code(code=code_from_db)
             return {
                 "message": "Code deleted successfully",
             }

@@ -22,7 +22,8 @@ async def post_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    created_language = await language_services.add_language(language=language)
+    created_language = language_services.add_language(language=language)
+    print(created_language)
     if not created_language:
         raise HTTPException(
             detail="language with that name already exists",
@@ -39,7 +40,7 @@ async def get_all_languages():
     """
     returns queryset of all languages from the database
     """
-    return await language_services.all_languages()
+    return language_services.all_languages()
 
 
 async def get_language(id: int):
@@ -47,7 +48,7 @@ async def get_language(id: int):
     returns language of particular id from the database
 
     """
-    if language := await language_services.get_language_fromdb(id=id):
+    if language := language_services.get_language_fromdb(id=id):
         return language
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND
@@ -56,7 +57,7 @@ async def get_language(id: int):
 
 async def patch_language(
     id: int,
-    language: language_schemas.LanguageSchema,
+    language: language_schemas.LanguageUpdateSchema,
     user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
 ):
     """
@@ -71,9 +72,8 @@ async def patch_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if from_db_language := await language_services.non_schema_get_language(id=id):
-
-        await language_services.update_language(
+    if from_db_language := language_services.get_language_fromdb(id=id):
+        language_services.update_language(
             language=from_db_language, request_data=language
         )
         return language
@@ -94,8 +94,8 @@ async def delete_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if language := await language_services.non_schema_get_language(id=id):
-        await language_services.delete_language(language=language)
+    if language := language_services.get_language_fromdb(id=id):
+        language_services.delete_language(language=language)
         return {"message": "language deleted successfully"}
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND

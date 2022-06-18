@@ -30,7 +30,7 @@ async def users(
     }
     """
     if admin_user:
-        return paginate(await admin_services.get_users())
+        return paginate(admin_services.get_users())
     else:
         raise HTTPException(
             detail="you are not authorized to access this resource",
@@ -60,7 +60,7 @@ async def create_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    user = await admin_services.add_user(user)
+    user = admin_services.add_user(user)
     if not user[0]:
         raise HTTPException(
             detail=user[1],
@@ -85,8 +85,8 @@ async def delete_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user := await auth_services.get_user_by_username(username=username):
-        await admin_services.remove_user(user=user)
+    if user := auth_services.get_user_by_username(username=username):
+        admin_services.remove_user(user=user)
         return {"message": "user deleted"}
     raise HTTPException(
         detail="user not found",
@@ -113,8 +113,9 @@ async def patch_user(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user_from_db := await auth_services.get_user_by_username(username=username):
-        result = await admin_services.update_user(user=user_from_db, request_data=user)
+    if user_from_db := auth_services.get_user_by_username(username=username):
+        del user_from_db.password
+        result = admin_services.update_user(user=user_from_db, request_data=user)
         if not result[0]:
             raise HTTPException(
                 detail=result[1],
@@ -135,4 +136,4 @@ async def get_all_code(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return paginate(await admin_services.get_all_from_db())
+    return paginate(admin_services.get_all_code_from_db())
