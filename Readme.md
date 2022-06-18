@@ -30,6 +30,8 @@ cd codeshare-back
 sudo docker-compose up --build
 ```
 
+#### NOTE: make sure to comment out line no 4 and 6 in entrypoint.sh after building the image  
+
 #### Without Docker
 
 - Install poetry: https://python-poetry.org/
