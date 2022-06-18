@@ -31,6 +31,7 @@ def get_language_fromdb_name(name: str):
 
 def add_language(
     language: language_schemas.LanguageSchema,
+    user_id: int,
 ) -> Union[None, language_schemas.LanguageSchema]:
     """
     adds language to the database if the language already exists then returns none
@@ -38,7 +39,15 @@ def add_language(
     if get_language_fromdb_name(language.name):
         return None
     queries.insert(
-        table_name="language", values=(language.name,), column_names=("name",)
+        table_name="language",
+        values=(
+            language.name,
+            user_id,
+        ),
+        column_names=(
+            "name",
+            "user_id",
+        ),
     )
     language_from_db = get_language_fromdb_name(language.name)
     return language_from_db

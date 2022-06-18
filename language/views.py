@@ -22,8 +22,9 @@ async def post_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    created_language = language_services.add_language(language=language)
-    print(created_language)
+    created_language = language_services.add_language(
+        language=language, user_id=user.id
+    )
     if not created_language:
         raise HTTPException(
             detail="language with that name already exists",

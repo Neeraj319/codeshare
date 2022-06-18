@@ -51,16 +51,20 @@ def update_user(
     user -> User model, request_data -> UserUpdateSchema
     returns the same but updated user
     """
-    if auth_services.get_user_by_username(user.username):
+    if user_from_db := auth_services.get_user_by_username(user.username):
+        if not request_data.dict().get("username"):
+            request_data.__dict__.pop("username")
+        if not request_data.is_admin != user_from_db.is_admin:
+            request_data.__dict__.pop("is_admin")
         columns = tuple(request_data.dict().keys())
         queries.update(
             table_name="user",
             column_names=columns,
             condition="where username = %s",
-            values=(request_data.username, request_data.is_admin),
+            values=tuple(request_data.dict().values()),
             condition_values=(user.username,),
         )
-        updated_user = auth_services.get_user_by_username(user.username)
+        updated_user = auth_services.get_user_by_id(user.id)
         del updated_user.password
         return (True, updated_user)
     return (False, "user does not exist")

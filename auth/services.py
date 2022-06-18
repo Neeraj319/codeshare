@@ -24,6 +24,20 @@ def get_user_by_username(
     return auth_schemas.UserSchema(**user_dict)
 
 
+def get_user_by_id(user_id: int) -> auth_schemas.UserSchema:
+    """
+    user_id -> id of the user\n
+    returns the User:
+    """
+    data = queries.select(
+        table_name="user", condition="where id = %s", condition_values=(user_id,)
+    )
+    if not data:
+        return None
+    user_dict = dict(zip(("id", "username", "password", "is_admin"), data[0]))
+    return auth_schemas.UserSchema(**user_dict)
+
+
 def add_user(user: auth_schemas.UserSchema) -> auth_schemas.UserResponseSchema:
     """
     basically adds user to the database by doing bunch of checks

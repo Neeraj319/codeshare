@@ -99,17 +99,18 @@ def update_code(
     for key, value in request_data.dict().items():
         if value is None:
             del request_data.__dict__[key]
-    if language_services.get_language_fromdb(id=request_data.language_id):
-        queries.update(
-            table_name="code",
-            column_names=tuple(request_data.dict().keys()),
-            values=tuple(request_data.dict().values()),
-            condition="where slug = %s",
-            condition_values=(code.slug,),
-        )
+    if request_data.dict().get("language_id"):
+        if not language_services.get_language_fromdb(id=request_data.language_id):
+            return None
+    queries.update(
+        table_name="code",
+        column_names=tuple(request_data.dict().keys()),
+        values=tuple(request_data.dict().values()),
+        condition="where slug = %s",
+        condition_values=(code.slug,),
+    )
 
-        return get_code_by_slug(slug=code.slug)
-    return None
+    return get_code_by_slug(slug=code.slug)
 
 
 def remove_code(code: code_schemas.CodeSchema):

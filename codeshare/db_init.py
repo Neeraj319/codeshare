@@ -36,4 +36,10 @@ def create_tables():
     """
     this function creates tables on the database
     """
+    with open("/app/schema.sql", "r") as f:
+        schema = f.read()
+        with DBConnector() as conn:
+            conn.curr.execute(schema)
+            conn.connection.commit()
+
     print("created tables successfully")
