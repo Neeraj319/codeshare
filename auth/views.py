@@ -1,11 +1,16 @@
 from fastapi.exceptions import HTTPException
 from starlette import status
-from fastapi import Request
+from fastapi import Depends, Request
 from auth import schemas as auth_schemas
 from auth import services as auth_services
+from codeshare.queries import db_init
 
 
-async def signup(user: auth_schemas.UserSchema, request: Request):
+async def signup(
+    user: auth_schemas.UserSchema,
+    request: Request,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
         route for creating user on the database only non admins can be created from this route
         dose not matter if you send (is_admin, id) or not backend will remove it
@@ -16,10 +21,15 @@ async def signup(user: auth_schemas.UserSchema, request: Request):
 
     """
 
-    return await auth_services.add_user(user)
+    data = auth_services.add_user(user=user, db_session=db_session)
+    db_session.close()
+    return data
 
 
-async def login(credentials: auth_schemas.UserSchema):
+async def login(
+    credentials: auth_schemas.UserSchema,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
         this route returns `JWT` Token of an user on the database
         every time this route is visited with correct credentials Token gets reset
@@ -29,24 +39,38 @@ async def login(credentials: auth_schemas.UserSchema):
       "password": "string"
     }
     """
-    if user := await auth_services.authenticate_user(
-        username=credentials.username, password=credentials.password
+    if user := auth_services.authenticate_user(
+        db_session=db_session,
+        username=credentials.username,
+        password=credentials.password,
     ):
-        return {"token": await auth_services.create_token(user)}
+
+        data = {"token": auth_services.create_token(user)}
+        db_session.close()
+        return data
     else:
+        db_session.close()
         raise HTTPException(
             detail="invalid username or password",
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
 
-async def user_detail(user_id: int):
+async def user_detail(
+    username: int,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
     returns user with the given id
     """
-    if user := await auth_services.get_user_by_username(user_id):
+    if user := auth_services.get_user_by_username(
+        username=username, db_session=db_session
+    ):
+        del user.password
+        db_session.close()
         return user
     else:
+        db_session.close()
         raise HTTPException(
             detail="user not found",
             status_code=status.HTTP_404_NOT_FOUND,

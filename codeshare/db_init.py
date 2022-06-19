@@ -1,7 +1,5 @@
-from tortoise import Tortoise
-from auth import schemas as auth_schemas
-from admin import services as admin_servies
-from codeshare.settings import DB_URL, installed_models
+import psycopg2
+from codeshare import settings
 
 
 class DBConnector:
@@ -9,47 +7,49 @@ class DBConnector:
     context manager for database connection
     """
 
-    def __init__(self, db_url, modules) -> None:
-        self.db_url = db_url
-        self.modules = modules
+    def __init__(self) -> None:
+        self.connection = psycopg2.connect(settings.DB_URL)
+        self.curr = self.connection.cursor()
 
-    async def __aenter__(self):
-        await Tortoise.init(db_url=self.db_url, modules=self.modules)
+    def __enter__(self):
+        return self
 
-    async def __aexit__(self, exc_type, exc, tb):
-        await Tortoise.close_connections()
+    def __exit__(self, exc_type, exc, tb):
+        self.curr.close()
+        self.connection.close()
+
+    def close(self):
+        self.curr.close()
+        self.connection.close()
 
 
-async def main():
+def db_connection():
+    return DBConnector()
+
+
+def create_super_user(username, password):
     """
-    function to make connection to the database
-    """
-    await Tortoise.init(db_url=DB_URL, modules={"models": installed_models})
-
-
-async def close_db_connection():
-    """
-    closes connection from the database
-    """
-    await Tortoise.close_connections()
-
-
-async def create_super_user(username, password):
-    """ "
     this function creates superuser on the databse
     """
 
-    await main()
-    user = auth_schemas.UserSchema(username=username, password=password, is_admin=True)
-    await admin_servies.add_superuser(user)
-    await close_db_connection()
+    # this is done manually to prevent circular imports
+    hash = settings.get_crypto_context().hash(password)
+    with DBConnector() as conn:
+        conn.curr.execute(
+            'insert into "user" (username, password, is_admin) values (%s, %s, %s)',
+            (username, hash, True),
+        )
+        conn.connection.commit()
 
 
-async def create_tables():
+def create_tables():
     """
     this function creates tables on the database
     """
-    await main()
-    await Tortoise.generate_schemas()
-    await close_db_connection()
+    with open("/app/schema.sql", "r") as f:
+        schema = f.read()
+        with DBConnector() as conn:
+            conn.curr.execute(schema)
+            conn.connection.commit()
+
     print("created tables successfully")

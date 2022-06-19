@@ -7,11 +7,13 @@ from auth import services as auth_services
 from admin import dependencies as admin_dependencies
 from fastapi_pagination import paginate
 from admin import services as admin_services
+from codeshare import db_init
 
 
 async def users(
     request: Request,
     admin_user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         returns all the users from the database in paginated form
@@ -30,8 +32,11 @@ async def users(
     }
     """
     if admin_user:
-        return paginate(await admin_services.get_users())
+        data = paginate(admin_services.get_users(db_session=db_session))
+        db_session.close()
+        return data
     else:
+        db_session.close()
         raise HTTPException(
             detail="you are not authorized to access this resource",
             status_code=status.HTTP_403_FORBIDDEN,
@@ -42,6 +47,7 @@ async def create_user(
     user: auth_schema.UserSchema,
     request: Request,
     request_user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         admin specific route pass the following to the body
@@ -55,18 +61,21 @@ async def create_user(
 
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
-    user = await admin_services.add_user(user)
+    user = admin_services.add_user(user=user, db_session=db_session)
     if not user[0]:
+        db_session.close()
         raise HTTPException(
             detail=user[1],
             status_code=status.HTTP_409_CONFLICT,
         )
     else:
+        db_session.close()
         return user[1]
 
 
@@ -75,19 +84,25 @@ async def delete_user(
     request_user: auth_schema.UserSchema = Depends(
         admin_dependencies.get_super_user,
     ),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
     admin specific route username -> username (parameter) of the user
     deletes the user from the database
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user := await auth_services.get_user_by_username(username=username):
-        await admin_services.remove_user(user=user)
+    if user := auth_services.get_user_by_username(
+        username=username, db_session=db_session
+    ):
+        admin_services.remove_user(user=user, db_session=db_session)
+        db_session.close()
         return {"message": "user deleted"}
+    db_session.close()
     raise HTTPException(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,
@@ -100,6 +115,7 @@ async def patch_user(
     request_user: auth_schema.UserSchema = Depends(
         admin_dependencies.get_super_user,
     ),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         admin specific route username -> username (parameter) of the user
@@ -109,18 +125,27 @@ async def patch_user(
     }
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if user_from_db := await auth_services.get_user_by_username(username=username):
-        result = await admin_services.update_user(user=user_from_db, request_data=user)
+    if user_from_db := auth_services.get_user_by_username(
+        username=username, db_session=db_session
+    ):
+        del user_from_db.password
+        result = admin_services.update_user(
+            user=user_from_db, request_data=user, db_session=db_session
+        )
         if not result[0]:
+            db_session.close()
             raise HTTPException(
                 detail=result[1],
                 status_code=status.HTTP_409_CONFLICT,
             )
+        db_session.close()
         return result[1]
+    db_session.close()
     raise HTTPException(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,
@@ -129,10 +154,13 @@ async def patch_user(
 
 async def get_all_code(
     user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     if not user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return paginate(await admin_services.get_all_from_db())
+    data = paginate(admin_services.get_all_code_from_db(db_session=db_session))
+    return data

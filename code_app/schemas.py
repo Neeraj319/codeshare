@@ -6,7 +6,8 @@ class CodeSchema(BaseModel):
     text: str
     language_id: int
     id: Optional[int] = None
-    url: Optional[str] = None
+    slug: Optional[str] = None
+    user_id: Optional[int] = None
 
 
 class CodeUpdateSchema(BaseModel):
