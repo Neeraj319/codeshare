@@ -26,8 +26,10 @@ async def post_code(
     if created_code := code_app_services.add_code(
         db_session=db_session, code=code, user=user, language_id=code.language_id
     ):
+        db_session.close()
         return created_code
     else:
+        db_session.close()
         raise HTTPException(
             detail="language not found", status_code=status.HTTP_404_NOT_FOUND
         )
@@ -40,8 +42,10 @@ async def get_code(
     returns code object with the given slug else 404 not found
     """
     if code := code_app_services.get_code_by_slug(db_session=db_session, slug=slug):
+        db_session.close()
         return code
     else:
+        db_session.close()
         raise HTTPException(
             detail="Code not found", status_code=status.HTTP_404_NOT_FOUND
         )
@@ -54,7 +58,9 @@ async def get_all_code(
     """
     returns all the code objects related to the particular user
     """
-    return paginate(code_app_services.get_all_from_db(db_session=db_session, user=user))
+    data = paginate(code_app_services.get_all_from_db(db_session=db_session, user=user))
+    db_session.close()
+    return data
 
 
 async def patch_code(
@@ -79,6 +85,7 @@ async def patch_code(
             if updated_code := code_app_services.update_code(
                 db_session=db_session, code=code_from_db, request_data=code
             ):
+                db_session.close()
                 return updated_code
             raise HTTPException(
                 detail="Language not found", status_code=status.HTTP_404_NOT_FOUND
@@ -88,6 +95,7 @@ async def patch_code(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     else:
+        db_session.close()
         raise HTTPException(
             detail="Code not found", status_code=status.HTTP_404_NOT_FOUND
         )
@@ -108,6 +116,7 @@ async def delete_code(
     ):
         if code_from_db.user_id == user.id:
             code_app_services.remove_code(db_session=db_session, code=code_from_db)
+            db_session.close()
             return {
                 "message": "Code deleted successfully",
             }
@@ -115,6 +124,7 @@ async def delete_code(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     else:
+        db_session.close()
         raise HTTPException(
             detail="Code not found", status_code=status.HTTP_404_NOT_FOUND
         )
