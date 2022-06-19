@@ -16,11 +16,19 @@ class DBConnector:
         self.curr = self.connection.cursor()
 
     def __enter__(self):
-        return self
+        print("enter")
 
     def __exit__(self, exc_type, exc, tb):
         self.curr.close()
         self.connection.close()
+
+    def close(self):
+        self.curr.close()
+        self.connection.close()
+
+
+def db_connection():
+    return DBConnector()
 
 
 def create_super_user(username, password):
