@@ -21,7 +21,9 @@ async def signup(
 
     """
 
-    return auth_services.add_user(user=user, db_session=db_session)
+    data = auth_services.add_user(user=user, db_session=db_session)
+    db_session.close()
+    return data
 
 
 async def login(
@@ -42,8 +44,12 @@ async def login(
         username=credentials.username,
         password=credentials.password,
     ):
-        return {"token": auth_services.create_token(user)}
+
+        data = {"token": auth_services.create_token(user)}
+        db_session.close()
+        return data
     else:
+        db_session.close()
         raise HTTPException(
             detail="invalid username or password",
             status_code=status.HTTP_403_FORBIDDEN,
@@ -61,8 +67,10 @@ async def user_detail(
         username=username, db_session=db_session
     ):
         del user.password
+        db_session.close()
         return user
     else:
+        db_session.close()
         raise HTTPException(
             detail="user not found",
             status_code=status.HTTP_404_NOT_FOUND,

@@ -19,7 +19,7 @@ async def post_language(
     }
     """
     if not user:
-
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -28,10 +28,12 @@ async def post_language(
         language=language, user_id=user.id, db_session=db_session
     )
     if not created_language:
+        db_session.close()
         raise HTTPException(
             detail="language with that name already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
+    db_session.close()
     return created_language
 
 
@@ -45,7 +47,9 @@ async def get_all_languages(
     """
     returns queryset of all languages from the database
     """
-    return language_services.all_languages(db_session=db_session)
+    data = language_services.all_languages(db_session=db_session)
+    db_session.close()
+    return data
 
 
 async def get_language(
@@ -57,7 +61,9 @@ async def get_language(
 
     """
     if language := language_services.get_language_fromdb(id=id, db_session=db_session):
+        db_session.close()
         return language
+    db_session.close()
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND
     )
@@ -77,6 +83,7 @@ async def patch_language(
     }
     """
     if not user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -89,7 +96,9 @@ async def patch_language(
             request_data=language,
             db_session=db_session,
         )
+        db_session.close()
         return language
+    db_session.close()
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND
     )
@@ -105,13 +114,16 @@ async def delete_language(
     """
 
     if not user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     if language := language_services.get_language_fromdb(id=id, db_session=db_session):
         language_services.delete_language(language=language, db_session=db_session)
+        db_session.close()
         return {"message": "language deleted successfully"}
+    db_session.close()
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND
     )
