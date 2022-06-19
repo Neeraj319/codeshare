@@ -38,7 +38,8 @@ def get_all_from_db(
     )
     codes_list = list()
     for code in data:
-        codes_list.append(dict(zip(("id", "slug", "text"), code)))
+        codes_list.append(dict(zip(("id", "text", "language_id", "slug"), code)))
+    print(codes_list)
     return [code_schemas.CodeSchema(**code) for code in codes_list]
 
 

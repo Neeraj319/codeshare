@@ -62,12 +62,14 @@ def update_user(
     user -> User model, request_data -> UserUpdateSchema
     returns the same but updated user
     """
-    if user_from_db := auth_services.get_user_by_username(
-        username=user.username, db_session=db_session
+    if not (
+        auth_services.get_user_by_username(
+            username=request_data.username, db_session=db_session
+        )
     ):
         if not request_data.dict().get("username"):
             request_data.__dict__.pop("username")
-        if not request_data.is_admin != user_from_db.is_admin:
+        if not request_data.is_admin != user.is_admin:
             request_data.__dict__.pop("is_admin")
         columns = tuple(request_data.dict().keys())
         queries.update(
@@ -83,7 +85,7 @@ def update_user(
         )
         del updated_user.password
         return (True, updated_user)
-    return (False, "user does not exist")
+    return (False, "username already exists")
 
 
 def get_all_code_from_db(

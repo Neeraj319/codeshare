@@ -162,5 +162,5 @@ async def get_all_code(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    db_session.close()
-    return paginate(admin_services.get_all_code_from_db(db_session=db_session))
+    data = paginate(admin_services.get_all_code_from_db(db_session=db_session))
+    return data
