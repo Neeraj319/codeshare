@@ -1,8 +1,4 @@
 import psycopg2
-
-from auth import schemas as auth_schemas
-
-from admin import services as admin_services
 from codeshare import settings
 
 
@@ -16,7 +12,7 @@ class DBConnector:
         self.curr = self.connection.cursor()
 
     def __enter__(self):
-        print("enter")
+        return self
 
     def __exit__(self, exc_type, exc, tb):
         self.curr.close()
@@ -36,8 +32,14 @@ def create_super_user(username, password):
     this function creates superuser on the databse
     """
 
-    user = auth_schemas.UserSchema(username=username, password=password, is_admin=True)
-    admin_services.add_superuser(user=user, db_session=DBConnector())
+    # this is done manually to prevent circular imports
+    hash = settings.get_crypto_context().hash(password)
+    with DBConnector() as conn:
+        conn.curr.execute(
+            'insert into "user" (username, password, is_admin) values (%s, %s, %s)',
+            (username, hash, True),
+        )
+        conn.connection.commit()
 
 
 def create_tables():
