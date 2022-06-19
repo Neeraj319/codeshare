@@ -3,7 +3,7 @@ from starlette import status
 from fastapi import Depends, Request
 from auth import schemas as auth_schemas
 from auth import services as auth_services
-from codeshare import db_init
+from codeshare.queries import db_init
 
 
 async def signup(
