@@ -13,7 +13,7 @@ from codeshare import db_init
 async def users(
     request: Request,
     admin_user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
-    db_session: db_init.db_connection = Depends(db_init.db_connection),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         returns all the users from the database in paginated form
@@ -32,8 +32,11 @@ async def users(
     }
     """
     if admin_user:
-        return paginate(admin_services.get_users(db_session=db_session))
+        data = paginate(admin_services.get_users(db_session=db_session))
+        db_session.close()
+        return data
     else:
+        db_session.close()
         raise HTTPException(
             detail="you are not authorized to access this resource",
             status_code=status.HTTP_403_FORBIDDEN,
@@ -58,6 +61,7 @@ async def create_user(
 
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,11 +69,13 @@ async def create_user(
 
     user = admin_services.add_user(user=user, db_session=db_session)
     if not user[0]:
+        db_session.close()
         raise HTTPException(
             detail=user[1],
             status_code=status.HTTP_409_CONFLICT,
         )
     else:
+        db_session.close()
         return user[1]
 
 
@@ -85,6 +91,7 @@ async def delete_user(
     deletes the user from the database
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -93,7 +100,9 @@ async def delete_user(
         username=username, db_session=db_session
     ):
         admin_services.remove_user(user=user, db_session=db_session)
+        db_session.close()
         return {"message": "user deleted"}
+    db_session.close()
     raise HTTPException(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,
@@ -116,6 +125,7 @@ async def patch_user(
     }
     """
     if not request_user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -128,11 +138,14 @@ async def patch_user(
             user=user_from_db, request_data=user, db_session=db_session
         )
         if not result[0]:
+            db_session.close()
             raise HTTPException(
                 detail=result[1],
                 status_code=status.HTTP_409_CONFLICT,
             )
+        db_session.close()
         return result[1]
+    db_session.close()
     raise HTTPException(
         detail="user not found",
         status_code=status.HTTP_404_NOT_FOUND,
@@ -144,8 +157,10 @@ async def get_all_code(
     db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     if not user:
+        db_session.close()
         raise HTTPException(
             detail="you are not allowed to update this code",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
+    db_session.close()
     return paginate(admin_services.get_all_code_from_db(db_session=db_session))
