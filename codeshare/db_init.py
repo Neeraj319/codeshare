@@ -23,7 +23,10 @@ class DBConnector:
         self.connection.close()
 
 
-def db_connection():
+def db_connection() -> DBConnector:
+    """
+    returns the database connection object
+    """
     return DBConnector()
 
 
