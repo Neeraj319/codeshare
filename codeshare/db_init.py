@@ -37,7 +37,7 @@ def create_super_user(username, password):
     """
 
     user = auth_schemas.UserSchema(username=username, password=password, is_admin=True)
-    admin_services.add_superuser(user)
+    admin_services.add_superuser(user=user, db_session=DBConnector())
 
 
 def create_tables():
