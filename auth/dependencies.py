@@ -6,10 +6,12 @@ from codeshare.settings import get_oauth_2_scheme
 from typing import Union
 from auth import schemas as auth_schmeas
 from auth import services as auth_services
+from codeshare import db_init
 
 
 async def get_user_from_token(
     token: str = Depends(get_oauth_2_scheme()),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ) -> Union[auth_schmeas.UserResponseSchema, None]:
     """
     token -> JWT token \n
@@ -31,7 +33,9 @@ async def get_user_from_token(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    if user := auth_services.get_user_by_username(username):
+    if user := auth_services.get_user_by_username(
+        username=username, db_session=db_session
+    ):
         del user.password
         return user
     else:

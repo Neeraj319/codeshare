@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException
 from admin import dependencies as admin_dependencies
 from auth import schemas as auth_schemas
+from codeshare import db_init
 from language import schemas as language_schemas
 from starlette import status
 from language import services as language_services
@@ -9,6 +10,7 @@ from language import services as language_services
 async def post_language(
     language: language_schemas.LanguageSchema,
     user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         admin specific route, creates passed language to the database
@@ -23,7 +25,7 @@ async def post_language(
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
     created_language = language_services.add_language(
-        language=language, user_id=user.id
+        language=language, user_id=user.id, db_session=db_session
     )
     if not created_language:
         raise HTTPException(
@@ -37,19 +39,24 @@ async def post_language(
 # let's keep it like this for some time
 
 
-async def get_all_languages():
+async def get_all_languages(
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
     returns queryset of all languages from the database
     """
-    return language_services.all_languages()
+    return language_services.all_languages(db_session=db_session)
 
 
-async def get_language(id: int):
+async def get_language(
+    id: int,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
     returns language of particular id from the database
 
     """
-    if language := language_services.get_language_fromdb(id=id):
+    if language := language_services.get_language_fromdb(id=id, db_session=db_session):
         return language
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND
@@ -60,6 +67,7 @@ async def patch_language(
     id: int,
     language: language_schemas.LanguageUpdateSchema,
     user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
         admin specific route, updates language of particular id from the database
@@ -73,9 +81,13 @@ async def patch_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if from_db_language := language_services.get_language_fromdb(id=id):
+    if from_db_language := language_services.get_language_fromdb(
+        id=id, db_session=db_session
+    ):
         language_services.update_language(
-            language=from_db_language, request_data=language
+            language=from_db_language,
+            request_data=language,
+            db_session=db_session,
         )
         return language
     raise HTTPException(
@@ -84,7 +96,9 @@ async def patch_language(
 
 
 async def delete_language(
-    id: int, user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user)
+    id: int,
+    user: auth_schemas.UserSchema = Depends(admin_dependencies.get_super_user),
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
     """
     admin specific route, deletes language of particular id passed
@@ -95,8 +109,8 @@ async def delete_language(
             detail="you are not allowed to view this resource",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    if language := language_services.get_language_fromdb(id=id):
-        language_services.delete_language(language=language)
+    if language := language_services.get_language_fromdb(id=id, db_session=db_session):
+        language_services.delete_language(language=language, db_session=db_session)
         return {"message": "language deleted successfully"}
     raise HTTPException(
         detail="language not found", status_code=status.HTTP_404_NOT_FOUND

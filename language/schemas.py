@@ -9,4 +9,3 @@ class LanguageSchema(BaseModel):
 
 class LanguageUpdateSchema(BaseModel):
     name: Optional[str] = None
-    language_id: Optional[int] = None

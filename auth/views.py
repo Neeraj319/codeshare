@@ -1,11 +1,16 @@
 from fastapi.exceptions import HTTPException
 from starlette import status
-from fastapi import Request
+from fastapi import Depends, Request
 from auth import schemas as auth_schemas
 from auth import services as auth_services
+from codeshare import db_init
 
 
-async def signup(user: auth_schemas.UserSchema, request: Request):
+async def signup(
+    user: auth_schemas.UserSchema,
+    request: Request,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
         route for creating user on the database only non admins can be created from this route
         dose not matter if you send (is_admin, id) or not backend will remove it
@@ -16,10 +21,13 @@ async def signup(user: auth_schemas.UserSchema, request: Request):
 
     """
 
-    return auth_services.add_user(user)
+    return auth_services.add_user(user=user, db_session=db_session)
 
 
-async def login(credentials: auth_schemas.UserSchema):
+async def login(
+    credentials: auth_schemas.UserSchema,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
         this route returns `JWT` Token of an user on the database
         every time this route is visited with correct credentials Token gets reset
@@ -30,7 +38,9 @@ async def login(credentials: auth_schemas.UserSchema):
     }
     """
     if user := auth_services.authenticate_user(
-        username=credentials.username, password=credentials.password
+        db_session=db_session,
+        username=credentials.username,
+        password=credentials.password,
     ):
         return {"token": auth_services.create_token(user)}
     else:
@@ -40,11 +50,16 @@ async def login(credentials: auth_schemas.UserSchema):
         )
 
 
-async def user_detail(username: int):
+async def user_detail(
+    username: int,
+    db_session: db_init.DBConnector = Depends(db_init.db_connection),
+):
     """
     returns user with the given id
     """
-    if user := auth_services.get_user_by_username(username=username):
+    if user := auth_services.get_user_by_username(
+        username=username, db_session=db_session
+    ):
         del user.password
         return user
     else:

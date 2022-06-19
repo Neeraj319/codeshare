@@ -9,6 +9,7 @@ from codeshare import queries
 
 
 def get_user_by_username(
+    db_session,
     username: str,
 ) -> Union[auth_schemas.UserSchema, None]:
     """
@@ -16,7 +17,10 @@ def get_user_by_username(
     returns the User or None:
     """
     data = queries.select(
-        table_name="user", condition="where username = %s", condition_values=(username,)
+        session=db_session,
+        table_name="user",
+        condition="where username = %s",
+        condition_values=(username,),
     )
     if not data:
         return None
@@ -24,13 +28,16 @@ def get_user_by_username(
     return auth_schemas.UserSchema(**user_dict)
 
 
-def get_user_by_id(user_id: int) -> auth_schemas.UserSchema:
+def get_user_by_id(db_session, user_id: int) -> auth_schemas.UserSchema:
     """
     user_id -> id of the user\n
     returns the User:
     """
     data = queries.select(
-        table_name="user", condition="where id = %s", condition_values=(user_id,)
+        session=db_session,
+        table_name="user",
+        condition="where id = %s",
+        condition_values=(user_id,),
     )
     if not data:
         return None
@@ -38,7 +45,9 @@ def get_user_by_id(user_id: int) -> auth_schemas.UserSchema:
     return auth_schemas.UserSchema(**user_dict)
 
 
-def add_user(user: auth_schemas.UserSchema) -> auth_schemas.UserResponseSchema:
+def add_user(
+    db_session, user: auth_schemas.UserSchema
+) -> auth_schemas.UserResponseSchema:
     """
     basically adds user to the database by doing bunch of checks
     """
@@ -62,13 +71,18 @@ def add_user(user: auth_schemas.UserSchema) -> auth_schemas.UserResponseSchema:
         )
     # generating password hash
     password = get_crypto_context().hash(user.password)
-    if get_user_by_username(user.username):
+    if get_user_by_username(username=user.username, db_session=db_session):
         raise HTTPException(
             detail="username already exists",
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
         )
-    queries.insert("user", ("username", "password"), (user.username, password))
-    user = get_user_by_username(user.username)
+    queries.insert(
+        table_name="user",
+        column_names=("username", "password"),
+        values=(user.username, password),
+        session=db_session,
+    )
+    user = get_user_by_username(username=user.username, db_session=db_session)
     del user.password
     return user
 
@@ -79,12 +93,12 @@ JWT = NewType(
 )
 
 
-def authenticate_user(username: str, password: str):
+def authenticate_user(db_session, username: str, password: str):
     """
     verifies weather the user exists in database or not
     and validates the password
     """
-    user = get_user_by_username(username=username)
+    user = get_user_by_username(db_session=db_session, username=username)
     if not user:
         return None
     else:

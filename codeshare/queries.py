@@ -3,6 +3,7 @@ from typing import Union, Tuple
 
 
 def select(
+    session: db_init.DBConnector,
     table_name: str,
     column_names: Union[Tuple, str] = "*",
     condition: str = "",
@@ -22,12 +23,16 @@ def select(
         query += "*"
     query += f' FROM "{table_name}" {condition}'
 
-    with db_init.DBConnector() as conn:
-        conn.curr.execute(query=query, vars=condition_values)
-        return conn.curr.fetchall()
+    session.curr.execute(query=query, vars=condition_values)
+    return session.curr.fetchall()
 
 
-def insert(table_name: str, column_names: Tuple, values: Tuple):
+def insert(
+    session: db_init.DBConnector,
+    table_name: str,
+    column_names: Tuple,
+    values: Tuple,
+):
     """
     table_name -> table name
     column_names -> column names
@@ -40,13 +45,18 @@ def insert(table_name: str, column_names: Tuple, values: Tuple):
     query = "INSERT INTO " + f'"{table_name}"'
     query += "(" + ",".join(column_names) + ")"
     query += " VALUES (" + ",".join(["%s"] * len(values)) + ")"
-    with db_init.DBConnector() as conn:
-        conn.curr.execute(query, values)
-        conn.connection.commit()
-        print(f"{table_name} added")
+
+    session.curr.execute(query, values)
+    session.connection.commit()
+    print(f"{table_name} added")
 
 
-def delete(table_name: str, condition: str, condition_values: Tuple):
+def delete(
+    session: db_init.DBConnector,
+    table_name: str,
+    condition: str,
+    condition_values: Tuple,
+):
     """
     table_name -> table name
     condition -> condition to be applied
@@ -57,13 +67,13 @@ def delete(table_name: str, condition: str, condition_values: Tuple):
 
     query = "DELETE FROM " + f'"{table_name}"'
     query += condition
-    with db_init.DBConnector() as conn:
-        conn.curr.execute(query, condition_values)
-        conn.connection.commit()
-        print(f"{table_name} deleted")
+    session.curr.execute(query, condition_values)
+    session.connection.commit()
+    print(f"{table_name} deleted")
 
 
 def update(
+    session: db_init.DBConnector,
     table_name: str,
     column_names: Tuple,
     values: Tuple,
@@ -82,7 +92,7 @@ def update(
     for index, colum_name in enumerate(column_names):
         query += f" {colum_name} = {'%s' if index == len(column_names) - 1 else '%s,'} "
     query += f"{condition}"
-    with db_init.DBConnector() as conn:
-        conn.curr.execute(query, values + condition_values)
-        conn.connection.commit()
-        print(f"{table_name} updated")
+    print(query)
+    session.curr.execute(query, values + condition_values)
+    session.connection.commit()
+    print(f"{table_name} updated")
