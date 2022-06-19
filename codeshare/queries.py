@@ -92,7 +92,6 @@ def update(
     for index, colum_name in enumerate(column_names):
         query += f" {colum_name} = {'%s' if index == len(column_names) - 1 else '%s,'} "
     query += f"{condition}"
-    print(query)
     session.curr.execute(query, values + condition_values)
     session.connection.commit()
     print(f"{table_name} updated")
