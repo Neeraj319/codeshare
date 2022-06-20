@@ -38,11 +38,15 @@ def create_super_user(username, password):
     # this is done manually to prevent circular imports
     hash = settings.get_crypto_context().hash(password)
     with DBConnector() as conn:
-        conn.curr.execute(
-            'insert into "user" (username, password, is_admin) values (%s, %s, %s)',
-            (username, hash, True),
-        )
-        conn.connection.commit()
+        # check if username already exists or not
+        conn.curr.execute("SELECT * FROM users WHERE username = %s", (username,))
+        if conn.curr.fetchone():
+            conn.curr.execute(
+                'insert into "user" (username, password, is_admin) values (%s, %s, %s)',
+                (username, hash, True),
+            )
+            conn.connection.commit()
+        print("username already exists")
 
 
 def create_tables():
