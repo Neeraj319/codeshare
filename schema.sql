@@ -1,18 +1,18 @@
-CREATE Table "user" (
+CREATE IF NOT EXISTS Table "user" (
 	id SERIAL NOT NULL PRIMARY KEY,
 	username VARCHAR(20) UNIQUE NOT NULL,
 	password VARCHAR(400) NOT NULL,
 	is_admin BOOLEAN DEFAULT FALSE NOT NULL
 );
 
-CREATE TABLE "language"(
+CREATE IF NOT EXISTS TABLE "language"(
 	 id SERIAL NOT NULL PRIMARY KEY,
 	 name character varying(50) NOT NULL,
 	 user_id INT NOT NULL,
 	 FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE 
 );
 
-CREATE TABLE "code"(
+CREATE IF NOT EXISTS TABLE "code"(
 	id SERIAL NOT NULL PRIMARY KEY,
 	text text NOT NULL,
 	language_id int NOT NULL,
