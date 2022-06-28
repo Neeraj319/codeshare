@@ -18,7 +18,7 @@ async def get_code(slug: str, websocket: WebSocket):
     return from_db
 
 
-async def get_user_from_token(token: str, websocket: WebSocket):
+async def get_user_from_token(token: str):
     try:
         payload = jwt.decode(
             token,
@@ -27,13 +27,8 @@ async def get_user_from_token(token: str, websocket: WebSocket):
         )
         username: str = payload.get("username")
         if username is None:
-            await websocket.close(
-                reason="username is none", code=status.WS_1002_PROTOCOL_ERROR
-            )
+            return
     except JWTError:
-        await websocket.close(
-            reason="invalid JWT TOKEN", code=status.WS_1003_UNSUPPORTED_DATA
-        )
         return
     db_session = db_init.DBConnector()
     if user := auth_services.get_user_by_username(
@@ -44,6 +39,4 @@ async def get_user_from_token(token: str, websocket: WebSocket):
         return user
     else:
         db_session.close()
-        await websocket.close(
-            reason="No such user", code=status.WS_1008_POLICY_VIOLATION
-        )
+        return

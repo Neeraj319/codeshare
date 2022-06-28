@@ -1,42 +1,69 @@
 from fastapi import WebSocket
-from typing import List
+from typing import List, Union
+import os
+import redis
+
+
+class CustomWebSocket(WebSocket):
+    user_type: Union[None, str] = None
+
+
+class Room:
+    def __init__(self) -> None:
+        self.editor: CustomWebSocket = None
+        self.redis_client: redis.Redis = redis.Redis(
+            host=os.environ.get("REDIS_HOST"),
+            port=os.environ.get("REDIS_PORT"),
+            password=os.environ.get("REDIS_PASSWORD"),
+        )
+        self.viewers: List[CustomWebSocket] = []
+
+    def set_user(self, socket: CustomWebSocket):
+        if socket.user_type == "editor":
+            self.editor = socket
+        else:
+            self.viewers.append(socket)
+
+    def change_user(self, socket: CustomWebSocket):
+        if socket.user_type == "editor":
+            self.editor = None
+        else:
+            self.viewers.remove(socket)
+
+    async def broadcast_message(self, message: dict):
+        if self.viewers is not None:
+            for viewer in self.viewers:
+                await viewer.send_json(message)
 
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: List[CustomWebSocket] = []
         self.groups = {}
 
-    async def connect(self, websocket: WebSocket, user: str):
+    async def connect(self, websocket: CustomWebSocket) -> Room:
         await websocket.accept()
-        w_id = websocket.path_params["id"]
+        code_slug = websocket.path_params["slug"]
         self.active_connections.append(websocket)
-        connection_dict = self.groups.get(w_id)
-        if connection_dict is None:
-            connection_dict = {}
-            if user == ("editor"):
-                connection_dict["editor"] = websocket
-            else:
-                connection_dict["viewers"] = []
-                connection_dict["viewers"].append(websocket)
-            self.groups[w_id] = connection_dict
+        room: Union[Room, None] = self.groups.get(code_slug)
+        if room is None:
+            room = Room()
+            room.set_user(websocket)
+            self.groups[code_slug] = room
         else:
-            if user == ("editor"):
-                connection_dict["editor"] = websocket
-            else:
-                if not connection_dict.get("viewers"):
-                    connection_dict["viewers"] = []
-                connection_dict["viewers"].append(websocket)
+            room.set_user(websocket)
+        return room
 
-    async def disconnect(self, websocket: WebSocket):
-        await websocket.close()
+    async def disconnect(self, websocket: CustomWebSocket):
+        slug = websocket.path_params["slug"]
+        room: Room = self.groups.get(slug)
+        room.change_user(socket=websocket)
         self.active_connections.remove(websocket)
 
-    async def send_personal_message(self, message: dict, websocket: WebSocket):
+    async def send_personal_message(self, message: dict, websocket: CustomWebSocket):
         await websocket.send_json(message)
 
-    async def broadcast(self, message: str, id: int):
-        viewers_group = self.groups.get(str(id)).get("viewers")
-        if viewers_group is not None:
-            for viewer in viewers_group:
-                await viewer.send_json(message)
+    async def broadcast(self, message: dict, slug: str):
+        room: Room = self.groups.get(slug)
+        if room is not None:
+            await room.broadcast_message(message=message)

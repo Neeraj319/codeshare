@@ -19,7 +19,7 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(code_router)
 app.include_router(language_router)
-app.websocket("/ws/edit/{slug}/{token}")(sockets_main.edit)
+app.websocket("/ws/edit/{slug}/{token}/")(sockets_main.edit)
 add_pagination(app)
 
 
