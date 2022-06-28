@@ -7,7 +7,7 @@ and Nest JS.
 
 ### There are two ways of running this project locally
 
-#### Note: The application will run fine with all the default configurations that I have added however you are requested to add your own configurations to the application when running it.
+#### Note: The application will run fine with all the default configurations that I have added however you are requested to add your own configurations to the application when running it. Also make sure to add .env file and add configurations according to .ev.example file.
 
 - with Docker (recommended)
 - without Docker (not recommended)
