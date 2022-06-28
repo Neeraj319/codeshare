@@ -34,7 +34,7 @@ async def edit(
             message = await websocket.receive_json()
             if websocket.user_type == "editor":
                 await sockets.broadcast(message, code.slug)
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
                 redis_client.hset(code.slug, "text", message["text"])
     except WebSocketDisconnect:
         if websocket.user_type == "editor":
