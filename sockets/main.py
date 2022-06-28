@@ -16,13 +16,19 @@ async def edit(
     code: str = Depends(get_code),
     token: str = Depends(get_user_from_token),
 ):
+    """
+    this route is specific to live code updates for mutual sharing
+    token -> jwt token
+    db_session -> session for postgres connection
+    code -> this denotes the code slug and also is the code object
+    """
     if token and token.id == code.user_id:
         user_type = "editor"
     else:
         user_type = "viewer"
     websocket.user_type = user_type
     room = await sockets.connect(websocket)
-    redis_client: Redis = room.redis_client
+    redis_client: Redis = room.redis_client  # getting the redis client
     if not (text := redis_client.hget(code.slug, "text")):
         redis_client.hset(code.slug, "text", code.text)
         text = redis_client.hget(code.slug, "text")
@@ -34,6 +40,7 @@ async def edit(
             message = await websocket.receive_json()
             if websocket.user_type == "editor":
                 await sockets.broadcast(message, code.slug)
+                # to avoid maximum querying to the database this is implemented
                 await asyncio.sleep(0.3)
                 redis_client.hset(code.slug, "text", message["text"])
     except WebSocketDisconnect:

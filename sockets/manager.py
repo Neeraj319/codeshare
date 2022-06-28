@@ -4,11 +4,30 @@ import os
 import redis
 
 
+class Editor:
+    """
+    Class to represent Editor
+    """
+
+
+class Viewer:
+    """
+    Class to represent Viewer
+    """
+
+
 class CustomWebSocket(WebSocket):
-    user_type: Union[None, str] = None
+
+    # to represent the type of user
+    user_type: Union[None, Union[Editor, Viewer]] = None
 
 
 class Room:
+    """
+    Class that holds information of a particular code for sharing
+
+    """
+
     def __init__(self) -> None:
         self.editor: CustomWebSocket = None
         self.redis_client: redis.Redis = redis.Redis(
@@ -37,9 +56,13 @@ class Room:
 
 
 class ConnectionManager:
+    """
+    Main class for handling multiple client WebSocket requests
+    """
+
     def __init__(self):
         self.active_connections: List[CustomWebSocket] = []
-        self.groups = {}
+        self.groups = {}  # i have no ideaa wh
 
     async def connect(self, websocket: CustomWebSocket) -> Room:
         await websocket.accept()
@@ -54,16 +77,18 @@ class ConnectionManager:
             room.set_user(websocket)
         return room
 
-    async def disconnect(self, websocket: CustomWebSocket):
+    async def disconnect(self, websocket: CustomWebSocket) -> None:
         slug = websocket.path_params["slug"]
         room: Room = self.groups.get(slug)
         room.change_user(socket=websocket)
         self.active_connections.remove(websocket)
 
-    async def send_personal_message(self, message: dict, websocket: CustomWebSocket):
+    async def send_personal_message(
+        self, message: dict, websocket: CustomWebSocket
+    ) -> None:
         await websocket.send_json(message)
 
-    async def broadcast(self, message: dict, slug: str):
+    async def broadcast(self, message: dict, slug: str) -> None:
         room: Room = self.groups.get(slug)
         if room is not None:
             await room.broadcast_message(message=message)
