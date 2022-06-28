@@ -9,6 +9,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:localhost@db:5432/codeshare
     depends_on:
+      - redis
       - db
   db:
     image: postgres:13-alpine
@@ -20,6 +21,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=codeshare
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
 
 volumes:
   postgres_data:
+  cache:
+    driver: local
