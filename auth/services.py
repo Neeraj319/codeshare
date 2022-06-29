@@ -28,7 +28,7 @@ def get_user_by_username(
     return auth_schemas.UserSchema(**user_dict)
 
 
-def get_user_by_id(db_session, user_id: int) -> auth_schemas.UserSchema:
+def get_user_by_id(db_session, user_id: int) -> Union[auth_schemas.UserSchema, None]:
     """
     user_id -> id of the user\n
     returns the User:

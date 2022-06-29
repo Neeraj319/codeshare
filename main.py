@@ -9,6 +9,9 @@ from fastapi_pagination import add_pagination
 from sockets import main as sockets_main
 from code_app.urls import router as code_router
 from language.urls import router as language_router
+import dotenv
+
+dotenv.load_dotenv()
 
 
 app = FastAPI(
