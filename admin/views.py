@@ -31,16 +31,9 @@ async def users(
       "size": 1
     }
     """
-    if admin_user:
-        data = paginate(admin_services.get_users(db_session=db_session))
-        db_session.close()
-        return data
-    else:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not authorized to access this resource",
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+    data = paginate(admin_services.get_users(db_session=db_session))
+    db_session.close()
+    return data
 
 
 async def create_user(
@@ -60,13 +53,6 @@ async def create_user(
     }
 
     """
-    if not request_user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
-
     user = admin_services.add_user(user=user, db_session=db_session)
     if not user[0]:
         db_session.close()
@@ -90,12 +76,6 @@ async def delete_user(
     admin specific route username -> username (parameter) of the user
     deletes the user from the database
     """
-    if not request_user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     if user := auth_services.get_user_by_username(
         username=username, db_session=db_session
     ):
@@ -124,12 +104,6 @@ async def patch_user(
       "is_admin": bool
     }
     """
-    if not request_user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     if user_from_db := auth_services.get_user_by_username(
         username=username, db_session=db_session
     ):
@@ -156,11 +130,5 @@ async def get_all_code(
     user: auth_schema.UserSchema = Depends(admin_dependencies.get_super_user),
     db_session: db_init.DBConnector = Depends(db_init.db_connection),
 ):
-    if not user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to update this code",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     data = paginate(admin_services.get_all_code_from_db(db_session=db_session))
     return data

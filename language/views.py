@@ -18,12 +18,6 @@ async def post_language(
       "name": "string",
     }
     """
-    if not user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     created_language = language_services.add_language(
         language=language, user_id=user.id, db_session=db_session
     )
@@ -82,12 +76,6 @@ async def patch_language(
     "id": 0
     }
     """
-    if not user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     if from_db_language := language_services.get_language_fromdb(
         id=id, db_session=db_session
     ):
@@ -113,12 +101,6 @@ async def delete_language(
     admin specific route, deletes language of particular id passed
     """
 
-    if not user:
-        db_session.close()
-        raise HTTPException(
-            detail="you are not allowed to view this resource",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
     if language := language_services.get_language_fromdb(id=id, db_session=db_session):
         language_services.delete_language(language=language, db_session=db_session)
         db_session.close()
