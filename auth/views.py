@@ -4,6 +4,11 @@ from fastapi import Depends, Request
 from auth import schemas as auth_schemas
 from auth import services as auth_services
 from codeshare.queries import db_init
+from auth import dependencies as auth_dependencies
+import redis
+import os
+import random
+import string
 
 
 async def signup(
@@ -75,3 +80,20 @@ async def user_detail(
             detail="user not found",
             status_code=status.HTTP_404_NOT_FOUND,
         )
+
+
+async def create_token_sockets(
+    user: auth_schemas.UserSchema = Depends(auth_dependencies.get_user_from_token),
+):
+    """
+    returns a token to access websocket endpoints
+    """
+    redis_client = redis.Redis(
+        host=os.environ.get("REDIS_HOST"),
+        port=os.environ.get("REDIS_PORT"),
+        password=os.environ.get("REDIS_PASSWORD"),
+    )
+    token = "".join(random.choices(string.ascii_letters + string.digits, k=5))
+    redis_client.set(token, user.id)
+    redis_client.expire(token, 86400)  # expire after a day
+    return {"socket_access_token": token}
