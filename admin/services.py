@@ -45,7 +45,7 @@ def remove_user(db_session, user: auth_schemas.UserSchema) -> None:
     """
     takes the user as parameter and removes the user from the database
     """
-    queries.delete(
+    return queries.delete(
         table_name="user",
         condition="where username = %s",
         condition_values=(user.username,),

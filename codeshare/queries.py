@@ -69,7 +69,11 @@ def delete(
     query += condition
     session.curr.execute(query, condition_values)
     session.connection.commit()
-    print(f"{table_name} deleted")
+    if session.curr.rowcount > 0:
+        print(f"{table_name} deleted")
+        return True
+    else:
+        return False
 
 
 def update(
