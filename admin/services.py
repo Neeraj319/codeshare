@@ -80,6 +80,7 @@ def update_user(
             values=tuple(request_data.dict().values()),
             condition_values=(user.username,),
         )
+
         updated_user = auth_services.get_user_by_id(
             user_id=user.id, db_session=db_session
         )

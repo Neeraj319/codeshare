@@ -98,4 +98,8 @@ def update(
     query += f"{condition}"
     session.curr.execute(query, values + condition_values)
     session.connection.commit()
-    print(f"{table_name} updated")
+    if session.curr.rowcount > 0:
+        print(f"{table_name} updated")
+        return True
+    else:
+        return False
