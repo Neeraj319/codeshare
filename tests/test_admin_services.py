@@ -11,21 +11,24 @@ def db_connection():
 
 
 @pytest.fixture(scope="module")
-def user_schema_admin():
-    fake: faker.Faker = faker.Faker()
+def fakerInstance():
+    return faker.Faker()
+
+
+@pytest.fixture(scope="module")
+def user_schema_admin(fakerInstance):
     return schemas.UserSchema(
-        username=fake.user_name(),
-        password=fake.password(),
+        username=fakerInstance.user_name(),
+        password=fakerInstance.password(),
         is_admin=True,
     )
 
 
 @pytest.fixture(scope="module")
-def user_schema():
-    fake: faker.Faker = faker.Faker()
+def user_schema(fakerInstance):
     return schemas.UserSchema(
-        username=fake.user_name(),
-        password=fake.password(),
+        username=fakerInstance.user_name(),
+        password=fakerInstance.password(),
         is_admin=False,
     )
 
@@ -53,8 +56,9 @@ def test_update_user(
     user_schema: schemas.UserSchema,
     user_schema_admin: schemas.UserSchema,
     db_connection,
+    fakerInstance,
 ):
-    user_name = faker.Faker().user_name()
+    user_name = fakerInstance.user_name()
     update_user_schema = schemas.UserUpdateSchema(username=user_name, is_admin=True)
     user_from_db = auth_services.get_user_by_username(
         db_session=db_connection, username=user_schema.username
@@ -67,7 +71,7 @@ def test_update_user(
     )
     assert state == True
 
-    user_name = faker.Faker().user_name()
+    user_name = fakerInstance.user_name()
     update_user_schema = schemas.UserUpdateSchema(username=user_name, is_admin=False)
     user_from_db = auth_services.get_user_by_username(
         db_session=db_connection, username=user_schema_admin.username
