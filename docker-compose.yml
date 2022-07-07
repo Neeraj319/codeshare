@@ -6,8 +6,6 @@ services:
       - 8000:8000
     volumes:
       - .:/app
-    environment:
-      - DATABASE_URL=postgresql://postgres:localhost@db:5432/codeshare
     depends_on:
       - redis
       - db
