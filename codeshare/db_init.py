@@ -49,11 +49,11 @@ def create_super_user(username, password):
         print("username already exists")
 
 
-def create_tables():
+def create_tables(path: str = "/app/schema.sql"):
     """
     this function creates tables on the database
     """
-    with open("/app/schema.sql", "r") as f:
+    with open(path, "r") as f:
         schema = f.read()
         with DBConnector() as conn:
             conn.curr.execute(schema)

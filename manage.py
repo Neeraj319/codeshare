@@ -1,3 +1,4 @@
+from ast import arg
 import sys
 from codeshare import db_init
 import pathlib
@@ -36,7 +37,7 @@ except ValueError:
 
 
 def command_create_tables(*args):
-    db_init.create_tables()
+    db_init.create_tables(*args)
 
 
 def createsuperuser(*args):
