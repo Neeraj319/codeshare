@@ -101,3 +101,4 @@ def test_delete_user(
         db_session=db_connection,
     )
     assert state == True
+    db_connection.close()
