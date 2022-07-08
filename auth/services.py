@@ -110,7 +110,6 @@ def authenticate_user(db_session, username: str, password: str):
 
 def create_token(user: auth_schemas.UserSchema) -> JWT:
     """
-    (do not pass password even if you do i will delete it :) )\n
     function to to create a jwt token of passed user
     returns the created JWT token
 
