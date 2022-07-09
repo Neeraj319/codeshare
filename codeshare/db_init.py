@@ -60,5 +60,4 @@ def create_tables(path: str = "/app/schema.sql"):
         with DBConnector() as conn:
             conn.curr.execute(schema)
             conn.connection.commit()
-
     print("created tables successfully")
