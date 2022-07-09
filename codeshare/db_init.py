@@ -39,13 +39,15 @@ def create_super_user(username, password):
     hash = settings.get_crypto_context().hash(password)
     with DBConnector() as conn:
         # check if username already exists or not
-        conn.curr.execute("SELECT * FROM users WHERE username = %s", (username,))
-        if conn.curr.fetchone():
+        conn.curr.execute('SELECT * FROM "user" WHERE username = %s', (username,))
+        data = conn.curr.fetchone()
+        if not data:
             conn.curr.execute(
                 'insert into "user" (username, password, is_admin) values (%s, %s, %s)',
                 (username, hash, True),
             )
             conn.connection.commit()
+            return
         print("username already exists")
 
 
