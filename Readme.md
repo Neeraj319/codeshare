@@ -23,7 +23,7 @@ Clone the project
 Go to the project directory
 
 ```bash
-cd codeshare-back
+cd codeshare
 ```
 
 ```
@@ -38,7 +38,7 @@ sudo docker-compose up --build
 - Install postgresql database from: https://www.postgresql.org/download/
 
 ```bash
-cd codeshare-back
+cd codeshare
 ```
 
 install required packages
