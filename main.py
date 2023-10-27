@@ -27,6 +27,7 @@ add_pagination(app)
 
 
 @app.get("/")
+# defining home function
 def home():
 
     return {"message": "Welcome to CodeShare. Nothing is here go to /docs for more"}
